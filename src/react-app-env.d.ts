@@ -12,5 +12,8 @@ declare module 'worker-loader!*' {
 }
 
 interface Window {
-  isShowAnswer: boolean;
+}
+declare module 'localforage' {
+  const content: any
+  export = content
 }

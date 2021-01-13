@@ -1,0 +1,27 @@
+.page-home {
+  width: 100vw;
+  overflow: auto;
+  background-color: white;
+
+  .wrapper-box {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  .nav {
+    padding-top: 50px;
+    width: 200px;
+    flex-shrink: 0;
+
+    .nav-item {
+      text-align: center;
+      line-height: 35px;
+    }
+  }
+
+  .music-box {
+    width: 100%;
+    padding: 50px;
+    background-color: rgba(247, 248, 254, 1);
+  }
+}
