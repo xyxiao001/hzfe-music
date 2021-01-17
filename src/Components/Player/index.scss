@@ -6,17 +6,23 @@
   height: 100%;
   z-index: 2021;
   color: white;
-  background-color: rgba(33, 32, 32, 1);
+  background-color: rgb(33, 32, 32);
 
   .player-box {
     display: flex;
     align-items: center;
     justify-content: space-around;
+    max-width: 1200px;
+    margin: auto;
   }
 
   .player-img {
     img {
       width: 300px;
     }
+  }
+
+  .play-control {
+    text-align: center;
   }
 }
