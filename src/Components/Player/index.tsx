@@ -38,11 +38,6 @@ const Player = () => {
     })
   }
 
-  const getMusicInfo = useCallback(async () => {
-    const info: InterfaceMusicInfo = await getInfoFormLocal() as InterfaceMusicInfo
-    setMusicInfo(info)
-  }, [])
-
   // 歌曲正在播放哦
   const musicPlaying = useCallback(() => {
     if (musicPlayer) {
@@ -53,7 +48,6 @@ const Player = () => {
         playing: musicPlayer.playing(),
         currentTime: time
       })
-      // console.log(musicPlayingInfo)
       if (musicPlayer.playing()) {
         requestAnimationFrame(musicPlaying)
       }
@@ -75,47 +69,21 @@ const Player = () => {
   }, [musicPlayer])
 
   // 歌曲加载成功事件
-  const handleLoad = useCallback(() => {
-    console.log('歌曲加载成功')
-    if (musicPlayer) {
-      setMusicPlayingInfo({
-        ...musicPlayingInfo,
-        duration: musicPlayer.duration()
-      })
-    }
-  }, [musicPlayer, musicPlayingInfo])
+  // const handleLoad = useCallback(() => {
+  //   console.log('歌曲加载成功')
+  //   if (musicPlayer) {
+  //     setMusicPlayingInfo({
+  //       ...musicPlayingInfo,
+  //       duration: musicPlayer.duration()
+  //     })
+  //   }
+  // }, [musicPlayer, musicPlayingInfo])
 
-  const initEvent = useCallback(() => {
-    if (musicPlayer) {
-      // 这里是去进行事件绑定
-      console.log('绑定音乐事件')
-      musicPlayer.on('load', handleLoad)
-      musicPlayer.on('seek', (event) => {
-        console.log('歌曲跳转了', event)
-      })
-    }
-  }, [handleLoad, musicPlayer])
-
-  // 创建音乐实例
-  const createMusic = useCallback(() => {
-    console.log('创建音乐实例')
-    if (musicInfo) {
-      setMusicPlayer(
-        new Howl({
-          src: URL.createObjectURL(musicInfo.music),
-          format: [musicInfo.codec.toLowerCase()],
-          // autoplay: false
-        })
-      )
-      initEvent()
-    }
-  }, [initEvent, musicInfo])
-  
 
   // 歌曲播放事件
   const handelPlay = useCallback(() => {
+    console.log('触发歌曲播放事件')
     if (musicPlayer) {
-      console.log('触发歌曲播放事件')
       if (!musicPlayer.playing()) {
         musicPlayer.play()
         requestAnimationFrame(musicPlaying)
@@ -123,17 +91,30 @@ const Player = () => {
     }
   }, [musicPlayer, musicPlaying])
 
+  const getMusicInfo = useCallback(async () => {
+    const info: InterfaceMusicInfo = await getInfoFormLocal() as InterfaceMusicInfo
+    setMusicInfo(info)
+  }, [])
+
   useEffect(() => {
     console.log('useEffect-getMusicInfo')
     getMusicInfo()
   }, [getMusicInfo])
 
+
   useEffect(() => {
     console.log('useEffect-create')
     if (musicInfo && !musicPlayer) {
-      createMusic()
+      console.log('创建音乐实例')
+      setMusicPlayer(
+        new Howl({
+          src: URL.createObjectURL(musicInfo.music),
+          format: [musicInfo.codec.toLowerCase()],
+          // autoplay: false
+        })
+      )
     }
-  }, [createMusic, musicInfo, musicPlayer])
+  }, [musicInfo, musicPlayer])
 
 
 

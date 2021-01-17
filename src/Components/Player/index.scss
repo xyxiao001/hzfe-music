@@ -8,6 +8,10 @@
   color: white;
   background-color: rgb(33, 32, 32);
 
+  .player-layout {
+    height: 500px;
+  }
+
   .player-box {
     display: flex;
     align-items: center;
