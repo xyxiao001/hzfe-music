@@ -7,4 +7,16 @@
   z-index: 2021;
   color: white;
   background-color: rgba(33, 32, 32, 1);
+
+  .player-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+  }
+
+  .player-img {
+    img {
+      width: 300px;
+    }
+  }
 }

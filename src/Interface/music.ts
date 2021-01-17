@@ -22,7 +22,11 @@ export interface InterfaceMusicInfo {
   // 歌曲采样率
   sampleRate: string
   // 对应的歌词信息
-  lrc: string
+  lrc?: string
+  // 对应的歌词hash 值，用作查询关联
+  lrcHash?: string
   // 真实歌曲
-  music?: Blob  
+  music?: Blob,
+  // 歌曲流 hash 值，用于查询歌曲流
+  musicHash?: string 
 }

@@ -35,9 +35,9 @@ import { InterfaceMusicInfo } from '../../Interface/music';
 
 const Player = () => {
 
-  const [musicPlayer, setMusicPlayer]:any = useState(null)
+  const [musicPlayer, setMusicPlayer] = useState<Howl | null>(null)
 
-  const [musicInfo, setMusicInfo]: any = useState(null)
+  const [musicInfo, setMusicInfo] = useState<InterfaceMusicInfo | null>(null)
 
   const getInfoFormLocal = async () => {
     return new Promise((resolve, reject) => {
@@ -57,7 +57,7 @@ const Player = () => {
   }
 
   const getMusicInfo = useCallback(async () => {
-    const info = await getInfoFormLocal()
+    const info: InterfaceMusicInfo = await getInfoFormLocal() as InterfaceMusicInfo
     setMusicInfo(info)
   }, [])
 
@@ -66,8 +66,13 @@ const Player = () => {
   }, [getMusicInfo])
 
   const handelPlay = () => {
+    if (!musicInfo) {
+      return
+    }
     if (musicPlayer) {
-      musicPlayer.play()
+      if (!musicPlayer.playing()) {
+        musicPlayer.play()
+      }
     } else {
       setMusicPlayer(
         new Howl({
@@ -96,6 +101,19 @@ const Player = () => {
       <Upload></Upload>
       <button onClick={handelPlay}>播放</button>
       <button onClick={handelStop}>暂停</button>
+      {/* 这里去渲染歌曲信息 */}
+      <section className="player-layout">
+        {
+          musicInfo ? 
+          <section className="player-box">
+            
+            <section className="player-img">
+              <img src={musicInfo.picture[0]} alt=""/>
+            </section>
+
+          </section> : ''
+        }
+      </section>
     </section>
   );
 }
