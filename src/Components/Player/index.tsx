@@ -2,36 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import './index.scss'
 import Upload from '../Upload'
 import localforage from 'localforage';
-import {Howl} from 'howler'
+import { Howl } from 'howler'
 import { InterfaceMusicInfo } from '../../Interface/music';
-
-// localforage.getItem('music').then(value => {
-//   console.log(value)
-// })
-
-
-// localforage.getItem('musicData').then(value => {
-//   console.log(value)
-//   const url = URL.createObjectURL(value)
-//   // const audio = new Audio()
-//   // audio.controls = true
-//   // audio.src = url
-//   // audio.autoplay = true
-//   // document.body.appendChild(audio)
-//   // URL.revokeObjectURL()
-//   const sound = new Howl({
-//     src: url,
-//     format: ['flac']
-//   })
-//   sound.play()
-//   Howler.volume(1)
-//   console.log(sound)
-// })
-
-// localforage.getItem('musicLrc').then(value => {
-//   console.log(value)
-// })
-
 
 const Player = () => {
 
