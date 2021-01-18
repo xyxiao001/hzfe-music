@@ -9,7 +9,7 @@
   background-color: rgb(33, 32, 32);
 
   .player-layout {
-    height: 500px;
+    height: 600px;
   }
 
   .player-box {
@@ -18,11 +18,21 @@
     justify-content: space-around;
     max-width: 1200px;
     margin: auto;
+    padding-top: 80px;
   }
 
   .player-img {
     img {
       width: 300px;
+    }
+  }
+
+  .player-info {
+    margin-bottom: 40px;
+    padding-left: 30px;
+
+    .music-name {
+      font-size: 20px;
     }
   }
 

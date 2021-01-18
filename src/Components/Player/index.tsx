@@ -134,7 +134,15 @@ const Player = () => {
               <section className="player-img">
                 <img src={musicInfo.picture[0]} alt="" />
               </section>
-              <Lrc lrc={musicInfo.lrc || ''}></Lrc>
+              <section className="player-right">
+                <section className="player-info">
+                  <p className="music-name">{musicInfo.name}</p>
+                  <p className="music-artist">歌手: {musicInfo.artist}</p>
+                  <p className="music-album">专辑: {musicInfo.album}</p>
+                  <p></p>
+                </section>
+                <Lrc lrc={musicInfo.lrc || ''} currentInfo={musicInfo || null} currentTime={musicPlayingInfo.currentTime}></Lrc>
+              </section>
             </section> : ''
         }
       </section>

@@ -5,6 +5,7 @@ import {
   Route
 } from "react-router-dom";
 import Home from './Home';
+import './App.scss'
 
 // function PrivateRoute({ children, ...rest }: any) {
 //   return (

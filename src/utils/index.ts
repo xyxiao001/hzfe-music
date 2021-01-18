@@ -120,8 +120,23 @@ export const formatLrc = (lrc: string): InterfaceLrc[] => {
   }
 }
 
+// 格式化时间显示
 export const formatTime = (secs: number): string => {
   const minutes = Math.floor(secs / 60) || 0;
   const seconds = ~~(secs - minutes * 60) || 0;
   return (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+}
+
+// 返回当前歌词选中的索引
+export const getChooseLrcIndex = (lrcList: InterfaceLrc[], time: number): number => {
+  if (lrcList.length <= 0) return -1
+  let index = 0
+  // 如果比当前时间小，那么聚焦当前时间
+  while (index < lrcList.length) {
+    if (lrcList[index].time > time) {
+      break
+    }
+    index++
+  }
+  return index - 1
 }
