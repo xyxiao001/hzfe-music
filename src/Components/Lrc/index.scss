@@ -8,8 +8,12 @@
 
   .lrc-list {
     font-size: 16px;
-    line-height: 25px;
     letter-spacing: 1px;
+
+    p {
+      line-height: 25px;
+      height: 25px;
+    }
   }
 
   .choose-lrc {
