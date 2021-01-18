@@ -28,6 +28,9 @@ const Lrc = (props: {
     setLrcIndex(
       getChooseLrcIndex(lrcList, props.currentTime)
     )
+  }, [lrcList, props.currentTime])
+
+  useEffect(() => {
     if (lrcScroll && canScroll) {
       // 计算当前歌词应该需要滚动的场景
       const target: any = lrcScroll.current
@@ -39,7 +42,7 @@ const Lrc = (props: {
         })
       }
     }
-  }, [canScroll, lrcIndex, lrcList, props.currentTime])
+  }, [canScroll, lrcIndex])
 
   const getLrcChooseName = (index: number) => {
     return lrcIndex === index ? 'choose-lrc' : ''

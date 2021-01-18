@@ -6,6 +6,7 @@ import { Howl } from 'howler'
 import { InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../../Interface/music';
 import Lrc from '../Lrc';
 import { formatTime } from '../../utils';
+import Control from '../Control';
 
 
 const Player = () => {
@@ -68,25 +69,14 @@ const Player = () => {
     }
   }, [musicPlayer])
 
-  // 歌曲加载成功事件
-  // const handleLoad = useCallback(() => {
-  //   console.log('歌曲加载成功')
-  //   if (musicPlayer) {
-  //     setMusicPlayingInfo({
-  //       ...musicPlayingInfo,
-  //       duration: musicPlayer.duration()
-  //     })
-  //   }
-  // }, [musicPlayer, musicPlayingInfo])
-
-
   // 歌曲播放事件
   const handelPlay = useCallback(() => {
-    console.log('触发歌曲播放事件')
     if (musicPlayer) {
       if (!musicPlayer.playing()) {
         musicPlayer.play()
-        requestAnimationFrame(musicPlaying)
+        setTimeout(() => {
+          requestAnimationFrame(musicPlaying)
+        }, 500)
       }
     }
   }, [musicPlayer, musicPlaying])
@@ -109,8 +99,8 @@ const Player = () => {
       setMusicPlayer(
         new Howl({
           src: URL.createObjectURL(musicInfo.music),
+          html5: true,
           format: [musicInfo.codec.toLowerCase()],
-          // autoplay: false
         })
       )
     }
@@ -121,6 +111,8 @@ const Player = () => {
 
   return (
     <section className="player">
+      <section className="player-bg" style={{ "backgroundImage": `url(${musicInfo?.picture[0]})` }}></section>
+      <section className="player-fade"></section>
       <Upload></Upload>
       <button onClick={handelPlay}>播放</button>
       <button onClick={handlePause}>暂停</button>
@@ -146,12 +138,13 @@ const Player = () => {
             </section> : ''
         }
       </section>
-      {/* 这里是歌曲控制台的 */}
-      <section className="play-control">
-        <p>歌曲播放状态 {musicPlayingInfo.playing ? '播放中' : '没有播放'}</p>
-        <p>歌曲总时长 {formatTime(musicPlayingInfo.duration)}</p>
-        <p>歌曲当前时间 {formatTime(musicPlayingInfo.currentTime)}</p>
+      <section className="music-log">
+         <p>歌曲播放状态 {musicPlayingInfo.playing ? '播放中' : '没有播放'}</p>
+          <p>歌曲总时长 {formatTime(musicPlayingInfo.duration)}</p>
+          <p>歌曲当前时间 {formatTime(musicPlayingInfo.currentTime)}</p>
       </section>
+      {/* 这里是歌曲控制台的 */}
+      <Control></Control>
     </section>
   );
 }
