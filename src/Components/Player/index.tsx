@@ -7,7 +7,7 @@ import { InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../../Interface/m
 import Lrc from '../Lrc';
 import { formatTime } from '../../utils';
 import Control from '../Control';
-
+import LrcWord from '../Lrc/Lrc-word';
 
 const Player = () => {
 
@@ -111,7 +111,7 @@ const Player = () => {
 
   return (
     <section className="player">
-      <section className="player-bg" style={{ "backgroundImage": `url(${musicInfo?.picture[0]})` }}></section>
+      <section className="player-bg" style={{ "backgroundImage": `url(${musicInfo?.picture[0] || process.env.PUBLIC_URL + '/images/music-no.jpeg'})` }}></section>
       <section className="player-fade"></section>
       <Upload></Upload>
       <button onClick={handelPlay}>播放</button>
@@ -124,7 +124,7 @@ const Player = () => {
             <section className="player-box">
 
               <section className="player-img">
-                <img src={musicInfo.picture[0]} alt="" />
+                <img src={musicInfo.picture[0] || process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
               </section>
               <section className="player-right">
                 <section className="player-info">
@@ -133,7 +133,22 @@ const Player = () => {
                   <p className="music-album">专辑: {musicInfo.album}</p>
                   <p></p>
                 </section>
-                <Lrc lrc={musicInfo.lrc || ''} currentInfo={musicInfo || null} currentTime={musicPlayingInfo.currentTime}></Lrc>
+                {
+                  musicInfo.lrc?.match(/\](\S)\[/g) ? (
+                    <LrcWord
+                      lrc={musicInfo.lrc || ''}
+                      currentInfo={musicInfo || null}
+                      currentTime={musicPlayingInfo.currentTime}
+                      isPlaying={musicPlayingInfo.playing}></LrcWord>
+                    )
+                 : (
+                  <Lrc
+                    lrc={musicInfo.lrc || ''}
+                    currentInfo={musicInfo || null}
+                    currentTime={musicPlayingInfo.currentTime}
+                    isPlaying={musicPlayingInfo.playing}></Lrc>
+                 )
+                }
               </section>
             </section> : ''
         }

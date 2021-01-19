@@ -1,4 +1,4 @@
-.music-lrc {
+.music-lrc-word {
   padding: 41px 0 200px 0;
   width: 360px;
   height: 370px;
@@ -11,13 +11,16 @@
     letter-spacing: 1px;
 
     p {
+      display: inline-block;
       line-height: 25px;
       height: 25px;
-      transition: all 0.38s ease-out;
     }
   }
 
-  .choose-lrc {
+  .choose-lrc-line {
+    transition: all 0.2s ease-in-out;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     color: #52c41a;
   }
 }

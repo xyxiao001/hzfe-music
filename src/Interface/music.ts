@@ -42,6 +42,14 @@ export interface InterfaceLrc {
   time: number
 }
 
+// 逐字歌词信息
+export interface InterfaceLrcWord {
+  // 歌词
+  text: string
+  start: number
+  end: number
+}
+
 // 歌曲播放信息状态储存
 export interface InterfaceMusicPlayingInfo {
   // 是否处于播放中
