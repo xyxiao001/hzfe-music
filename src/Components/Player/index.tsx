@@ -144,13 +144,15 @@ const Player = () => {
             <section className="player-box">
 
               <section className="player-left">
-                <section className="player-img">
+                <section className="player-line">
                   <img src={musicInfo.picture[0] || process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
                 </section>
-                <section className="player-info">
-                  <p className="music-name">{musicInfo.name}</p>
-                  <p className="music-artist">{musicInfo.artist} - {musicInfo.album}</p>
-                  <p className="music-current-lrc">{ currentLrc }</p>
+                <section className="player-line">
+                  <section className="player-info">
+                    <p className="music-name">{musicInfo.name}</p>
+                    <p className="music-artist">{musicInfo.artist} - {musicInfo.album}</p>
+                    <p className="music-current-lrc">{ currentLrc }</p>
+                  </section>
                 </section>
                 <Control
                   handlePlay={handelPlay}

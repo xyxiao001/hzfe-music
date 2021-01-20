@@ -61,13 +61,16 @@
     justify-content: center;
     margin-top: 5vh;
 
-    .player-img {
-      text-align: center;
+    .player-line {
       width: 100%;
+      margin: auto;
     }
+
     img {
+      display: block;
+      margin: auto;
       width: 30vw;
-      max-width: 60vh;
+      max-width: 50vh;
       border-radius: 20px;
       align-self: baseline;
     }
@@ -75,8 +78,8 @@
 
   .player-info {
     width: 30vw;
-    max-width: 60vh;
-    margin: 3vh 0;
+    max-width: 50vh;
+    margin: 3vh auto;
 
     .music-name {
       font-size: 22px;
