@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './index.scss'
 import { InterfaceMusicInfo } from '../../Interface/music';
 import { formatTime } from '../../utils';
+import Progress from '../Progress';
 const Control = (props: {
   currentInfo: InterfaceMusicInfo | null,
   currentTime: number,
@@ -22,6 +23,7 @@ const Control = (props: {
   return (
     <section className="player-control">
       <section className="control-progress">
+        <Progress></Progress>
         <span>歌曲进度百分比: { range.toFixed(2) }%</span>
       </section>
       <section className="control-line">
