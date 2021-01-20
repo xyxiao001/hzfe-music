@@ -32,7 +32,7 @@ const LrcWord = (props: {
   // 当前每行滚动的高度
   const [lineHeight, setLineHeight] = useState(0)
 
-  const topLine = 4
+  const topLine = 1
    
   useEffect(() => {
     setLrcList(formatLrcProgress(props.lrc))

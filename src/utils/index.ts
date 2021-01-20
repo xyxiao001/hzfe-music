@@ -155,7 +155,7 @@ export const formatLrcProgress = (lrc: string): InterfaceLrcWord[][] => {
       // 时间是 [[00:32.27], [00:32.27]] 数组，  子也是数组
       // 数据结构，每个字开始时间和结束时间 start = j + 1    end j - 1
       const lineTime = []
-      for (let j = 0; j < lrcText.length; j ++) {
+      for (let j = 0; j < lrcText.length; j++) {
         lineTime.push({
           text: lrcText[j],
           start: transformArrayToTime(lrcTimes[j]),
@@ -170,7 +170,7 @@ export const formatLrcProgress = (lrc: string): InterfaceLrcWord[][] => {
 }
 
 // 转换时间 [00:42.27] -> 11ms
-export const transformArrayToTime = (str: string):number => {
+export const transformArrayToTime = (str: string): number => {
   let time = 0
   const timeArr: number[] = /\[(\d{2}):(\d{2})(\.(\d{2,3}))?]/.exec(str)?.map(item => {
     return item ? Number(item) : 0
@@ -225,4 +225,63 @@ export const getWordLineProgress = (lrcItem: InterfaceLrcWord[], time: number): 
   const len = cur.end - cur.start
   progress += (time - cur.start) / len * (100 / lrcItem.length)
   return progress
+}
+
+// 滚动函数
+export const goScroll = (top: number, target: HTMLElement) => {
+  let requestAnimationFrame: any = null
+  if (window.requestAnimationFrame) {
+    requestAnimationFrame = window.requestAnimationFrame
+  } else {
+    requestAnimationFrame = setTimeout((fn) => {
+      fn()
+    }, 17)
+  }
+  // 当前时间
+  let t = 0
+  // 初始值
+  const b = target.scrollTop
+  // 变化量
+  const c = top - b
+
+  // 如果变化量太大，直接终止
+  if (Math.abs(c) > 200) {
+    target.scrollTo({
+      top,
+      behavior: 'smooth'
+    })
+    return
+  }
+  // 持续时间
+  const d = 10
+  const step = () => {
+    let top = Tween.Linear(t, b, c, d)
+    target.scrollTo({
+      top
+    })
+    t += 1
+    if (t <= d) {
+      requestAnimationFrame(step)
+    }
+  }
+  step()
+}
+// 运动
+const Tween = {
+  Linear: function (t: number, b: number, c: number, d: number): number {
+    return c * t / d + b;
+  },
+  QuadIn: function (t: number, b: number, c: number, d: number): number {
+    return c * (t /= d) * t + b;
+  },
+  QuadOut: function (t: number, b: number, c: number, d: number): number {
+    return -c * (t /= d) * (t - 2) + b;
+  },
+  QuadInOut: function (t: number, b: number, c: number, d: number): number {
+    if ((t /= d / 2) < 1) return c / 2 * t * t + b;
+    return -c / 2 * ((--t) * (t - 2) - 1) + b;
+  },
+  CubicIn: function (t: number, b: number, c: number, d: number): number {
+    return c * (t /= d) * t * t + b;
+  }
 }
