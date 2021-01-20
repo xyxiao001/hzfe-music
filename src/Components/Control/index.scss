@@ -1,8 +1,61 @@
 .player-control {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 80px;
-  border-top: 1px solid white;
+  width: 25vw;
+  height: 120px;
+
+  p {
+    margin: 0
+  }
+
+  .control-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    > section {
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
+  }
+
+  .line-left {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    opacity: .5;
+    line-height: 40px;
+  }
+
+  .line-center {
+    width: 100%;
+    justify-content: center;
+
+    .icon {
+      color: black;
+    }
+
+    .icon-play-bg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background-color: white;
+      padding: 10px;
+      border-radius: 100%;
+    }
+
+    .icon-play, .icon-pause {
+      font-size: 40px;
+      cursor: pointer;
+      transition: all .2s ease-in-out;
+    }
+  }
+
+  .line-right {
+    width: 120px;
+    width: 200px;
+    justify-content: flex-end;
+  }
 }

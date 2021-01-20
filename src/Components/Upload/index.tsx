@@ -24,7 +24,7 @@ const Upload = () => {
   }
 
   return (
-    <section className="page-Upload">
+    <section className="page-upload">
       <input type="file" onChange={(event: any) => fileUpload(event)} />
     </section>
   );

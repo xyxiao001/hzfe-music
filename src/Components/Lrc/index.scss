@@ -1,23 +1,42 @@
 .music-lrc {
-  padding: 41px 0 200px 0;
-  width: 360px;
-  height: 370px;
-  padding-left: 30px;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  padding-left: 96px;
+  overflow-y: auto;
+  transition: .5s;
+  height: 100%;
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   .lrc-list {
-    font-size: 16px;
-    letter-spacing: 1px;
-
+    letter-spacing: 2px;
+    // 一屏幕展示 10 行，那么每行 10vh， 高 10v  font-size: 5vh  margin-top: 5vh
     p {
-      line-height: 25px;
-      height: 25px;
-      transition: all 0.38s ease-out;
+      font-size: 3.5vh;
+      height: 5vh;
+      margin-top: 2.5vh;
+      margin-bottom: 0;
+      transition: all 0.2s ease-in-out;
+      opacity: .5;
+      font-weight: 400;
+    }
+
+    &:first-child {
+      margin-top: calc(5 + 2.5)vh;
+    }
+
+    &:last-child {
+      margin-bottom: 30vh;
     }
   }
 
-  .choose-lrc {
+  p.choose-lrc {
+    opacity: 1;
     color: #52c41a;
+    text-shadow: 0 0 1px white, 0 0 1px #00FFFF, 0 0 5px #7FFF00, 0 0 2px white;
   }
 }

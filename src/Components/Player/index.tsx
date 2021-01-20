@@ -5,7 +5,6 @@ import localforage from 'localforage';
 import { Howl } from 'howler'
 import { InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../../Interface/music';
 import Lrc from '../Lrc';
-import { formatTime } from '../../utils';
 import Control from '../Control';
 import LrcWord from '../Lrc/Lrc-word';
 
@@ -21,6 +20,8 @@ const Player = () => {
     duration: 0,
     currentTime: 0
   })
+
+  const [currentLrc, setCurrentLrc] = useState('')
 
   const getInfoFormLocal = async () => {
     return new Promise((resolve, reject) => {
@@ -63,23 +64,30 @@ const Player = () => {
   }, [musicPlayer])
 
   // 歌曲停止事件
-  const handleStop = useCallback(() => {
-    if (musicPlayer) {
-      musicPlayer.stop()
-    }
-  }, [musicPlayer])
+  // const handleStop = useCallback(() => {
+  //   if (musicPlayer) {
+  //     musicPlayer.stop()
+  //   }
+  // }, [musicPlayer])
 
   // 歌曲播放事件
   const handelPlay = useCallback(() => {
     if (musicPlayer) {
       if (!musicPlayer.playing()) {
         musicPlayer.play()
+        const time = musicPlayer.seek() as number
+        setMusicPlayingInfo({
+          ...musicPlayingInfo,
+          duration: musicPlayer.duration(),
+          playing: musicPlayer.playing(),
+          currentTime: time
+        })
         setTimeout(() => {
           requestAnimationFrame(musicPlaying)
-        }, 500)
+        }, 300)
       }
     }
-  }, [musicPlayer, musicPlaying])
+  }, [musicPlayer, musicPlaying, musicPlayingInfo])
 
   const getMusicInfo = useCallback(async () => {
     const info: InterfaceMusicInfo = await getInfoFormLocal() as InterfaceMusicInfo
@@ -107,35 +115,38 @@ const Player = () => {
   }, [musicInfo, musicPlayer])
 
 
-
-
   return (
     <section className="player">
       <section className="player-bg" style={{ "backgroundImage": `url(${musicInfo?.picture[0] || process.env.PUBLIC_URL + '/images/music-no.jpeg'})` }}></section>
       <section className="player-fade"></section>
       <Upload></Upload>
-      <button onClick={handelPlay}>播放</button>
-      <button onClick={handlePause}>暂停</button>
-      <button onClick={handleStop}>停止</button>
       {/* 这里去渲染歌曲信息 */}
       <section className="player-layout">
         {
           musicInfo ?
             <section className="player-box">
 
-              <section className="player-img">
-                <img src={musicInfo.picture[0] || process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
-              </section>
-              <section className="player-right">
+              <section className="player-left">
+                <section className="player-img">
+                  <img src={musicInfo.picture[0] || process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
+                </section>
                 <section className="player-info">
                   <p className="music-name">{musicInfo.name}</p>
-                  <p className="music-artist">歌手: {musicInfo.artist}</p>
-                  <p className="music-album">专辑: {musicInfo.album}</p>
-                  <p></p>
+                  <p className="music-artist">{musicInfo.artist} - {musicInfo.album}</p>
+                  <p className="music-current-lrc">{ currentLrc }</p>
                 </section>
+                <Control
+                  handlePlay={handelPlay}
+                  handlePause={handlePause}
+                  currentInfo={musicInfo || null}
+                  currentTime={musicPlayingInfo.currentTime}
+                  isPlaying={musicPlayingInfo.playing}></Control>
+              </section>
+              <section className="player-right">
                 {
                   musicInfo.lrc?.match(/\](\S)\[/g) ? (
                     <LrcWord
+                    setCurrentLrc={setCurrentLrc}
                       lrc={musicInfo.lrc || ''}
                       currentInfo={musicInfo || null}
                       currentTime={musicPlayingInfo.currentTime}
@@ -143,6 +154,7 @@ const Player = () => {
                     )
                  : (
                   <Lrc
+                    setCurrentLrc={setCurrentLrc}
                     lrc={musicInfo.lrc || ''}
                     currentInfo={musicInfo || null}
                     currentTime={musicPlayingInfo.currentTime}
@@ -153,13 +165,12 @@ const Player = () => {
             </section> : ''
         }
       </section>
-      <section className="music-log">
+      {/* <section className="music-log">
          <p>歌曲播放状态 {musicPlayingInfo.playing ? '播放中' : '没有播放'}</p>
           <p>歌曲总时长 {formatTime(musicPlayingInfo.duration)}</p>
           <p>歌曲当前时间 {formatTime(musicPlayingInfo.currentTime)}</p>
-      </section>
+      </section> */}
       {/* 这里是歌曲控制台的 */}
-      <Control></Control>
     </section>
   );
 }

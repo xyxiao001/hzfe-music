@@ -210,7 +210,7 @@ export const getWordLineProgress = (lrcItem: InterfaceLrcWord[], time: number): 
     }
     wordIndex++
   }
-  if (wordIndex < 0) return 0
+  if (wordIndex <= 0) return 0
   if (wordIndex >= lrcItem.length) return 100
   // 知道哪个字后, 看看一共多少字，然后分百分比，这里从 0 开始，实际少了一个字
   progress = wordIndex * (100 / lrcItem.length)

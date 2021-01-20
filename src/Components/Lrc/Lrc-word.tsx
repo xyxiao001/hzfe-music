@@ -8,7 +8,8 @@ const LrcWord = (props: {
   lrc: string,
   currentInfo: InterfaceMusicInfo | null,
   currentTime: number,
-  isPlaying: boolean
+  isPlaying: boolean,
+  setCurrentLrc: Function
 }) => {
   // 保存当前渲染的歌词列表
   const [lrcList, setLrcList] = useState<InterfaceLrcWord[][]>([])
@@ -26,6 +27,11 @@ const LrcWord = (props: {
   const [bg, setBg] = useState({
     backgroundImage: ''
   })
+
+  // 当前每行滚动的高度
+  const [lineHeight, setLineHeight] = useState(0)
+
+  const topLine = 4
    
   useEffect(() => {
     setLrcList(formatLrcProgress(props.lrc))
@@ -35,19 +41,25 @@ const LrcWord = (props: {
     setLrcIndex(
       getChooseLrcWordIndex(lrcList, props.currentTime)
     )
+    if (lrcList[lrcIndex] && lrcList[lrcIndex].length) {
+      const text = lrcList[lrcIndex].map(item => {
+        return item.text
+      })
+      props.setCurrentLrc(text.join(''))
+    }
     const key = getWordLineProgress(lrcList[lrcIndex], props.currentTime)
     setBg(
       {
         backgroundImage: `-webkit-linear-gradient(left,rgb(49, 194, 124) ${key}%,#ffffff ${key}%)`
       }
     )
-  }, [lrcIndex, lrcList, props.currentTime])
+  }, [lrcIndex, lrcList, props, props.currentTime])
 
   useEffect(() => {
     if (lrcScroll && canScroll && props.isPlaying) {
       // 计算当前歌词应该需要滚动的场景
       const target: any = lrcScroll.current
-      const top = 41 * (lrcIndex - 2) || 0
+      const top = lineHeight * (lrcIndex - topLine) || 0
       if (target) {
         target.scrollTo({
           top,
@@ -55,11 +67,24 @@ const LrcWord = (props: {
         })
       }
     }
-  }, [canScroll, lrcIndex, props.isPlaying])
+  }, [canScroll, lineHeight, lrcIndex, props.isPlaying])
 
   const getLrcChooseName = (index: number) => {
     return lrcIndex === index ? 'choose-lrc-line' : ''
   }
+
+  const resize = () => {
+    // 浏览器高除以 高度 + 
+    setLineHeight(document.body.offsetHeight * (5 + 2.5) / 100)
+  }
+
+  useEffect(() => {
+    window.addEventListener('resize', resize)
+    resize()
+    return () => {
+      window.removeEventListener('resize', resize)
+    }
+  }, [])
 
 
   return (
@@ -72,7 +97,7 @@ const LrcWord = (props: {
         setCanScroll(true)
         if (!props.isPlaying) return
         const target: any = lrcScroll.current
-        const top = 41 * (lrcIndex - 2) || 0
+        const top = lineHeight * (lrcIndex - topLine) || 0
         if (target) {
           target.scrollTo({
             top,
