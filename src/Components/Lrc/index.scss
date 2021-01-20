@@ -21,7 +21,7 @@
       margin-top: 2.5vh;
       margin-bottom: 0;
       transition: all 0.2s ease-in-out;
-      opacity: .5;
+      opacity: .4;
       font-weight: 400;
     }
 
@@ -36,7 +36,6 @@
 
   p.choose-lrc {
     opacity: 1;
-    color: #52c41a;
-    text-shadow: 0 0 1px white, 0 0 1px #00FFFF, 0 0 5px #7FFF00, 0 0 2px white;
+    // text-shadow: 0 0 1px white, 0 0 1px #00FFFF, 0 0 5px #7FFF00, 0 0 2px white;
   }
 }

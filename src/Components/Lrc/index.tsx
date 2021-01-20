@@ -7,7 +7,8 @@ const Lrc = (props: {
   currentInfo: InterfaceMusicInfo | null,
   currentTime: number,
   isPlaying: boolean,
-  setCurrentLrc: Function
+  setCurrentLrc: Function,
+  color?: string
 }) => {
   // 保存当前渲染的歌词列表
   const [lrcList, setLrcList] = useState<InterfaceLrc[]>([])
@@ -105,7 +106,15 @@ const Lrc = (props: {
       <section className="lrc-list">
         {
           lrcList.map((lrcItem: InterfaceLrc, index) => (
-            <p key={ lrcItem.time } className={getLrcChooseName(index)}>{ lrcItem.text}</p>
+            <p 
+              key={ lrcItem.time }
+              style={{
+                color: lrcIndex === index ? props.color : ''
+              }}
+              className={getLrcChooseName(index)}
+            >
+              { lrcItem.text}
+            </p>
           ))
         }
       </section>

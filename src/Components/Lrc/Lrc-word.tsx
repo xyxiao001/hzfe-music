@@ -9,7 +9,8 @@ const LrcWord = (props: {
   currentInfo: InterfaceMusicInfo | null,
   currentTime: number,
   isPlaying: boolean,
-  setCurrentLrc: Function
+  setCurrentLrc: Function,
+  color?: string
 }) => {
   // 保存当前渲染的歌词列表
   const [lrcList, setLrcList] = useState<InterfaceLrcWord[][]>([])
@@ -50,7 +51,7 @@ const LrcWord = (props: {
     const key = getWordLineProgress(lrcList[lrcIndex], props.currentTime)
     setBg(
       {
-        backgroundImage: `-webkit-linear-gradient(left,rgb(49, 194, 124) ${key}%,#ffffff ${key}%)`
+        backgroundImage: `-webkit-linear-gradient(left,${props.color} ${key}%,#ffffff ${key}%)`
       }
     )
   }, [lrcIndex, lrcList, props, props.currentTime])

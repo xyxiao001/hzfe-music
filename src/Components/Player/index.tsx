@@ -7,12 +7,18 @@ import { InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../../Interface/m
 import Lrc from '../Lrc';
 import Control from '../Control';
 import LrcWord from '../Lrc/Lrc-word';
+import FastAverageColor from 'fast-average-color';
+import { setLightness, setSaturation } from 'polished';
+
+const fac = new FastAverageColor();
 
 const Player = () => {
 
   const [musicPlayer, setMusicPlayer] = useState<Howl | null>(null)
 
   const [musicInfo, setMusicInfo] = useState<InterfaceMusicInfo | null>(null)
+
+  const [musicColor, setMusicColor] = useState('#52c41a')
 
   // 当前歌曲播放信息
   const [musicPlayingInfo, setMusicPlayingInfo] = useState<InterfaceMusicPlayingInfo>({
@@ -92,6 +98,17 @@ const Player = () => {
   const getMusicInfo = useCallback(async () => {
     const info: InterfaceMusicInfo = await getInfoFormLocal() as InterfaceMusicInfo
     setMusicInfo(info)
+    fac.getColorAsync(info.picture[0])
+    .then(color => {
+        setMusicColor(
+          setSaturation(.5, setLightness(.5, color.rgba))
+        )
+    })
+    .catch(e => {
+      setMusicColor(
+        '#52c41a'
+      )
+    });
   }, [])
 
   useEffect(() => {
@@ -146,7 +163,8 @@ const Player = () => {
                 {
                   musicInfo.lrc?.match(/\](\S)\[/g) ? (
                     <LrcWord
-                    setCurrentLrc={setCurrentLrc}
+                      setCurrentLrc={setCurrentLrc}
+                      color={musicColor}
                       lrc={musicInfo.lrc || ''}
                       currentInfo={musicInfo || null}
                       currentTime={musicPlayingInfo.currentTime}
@@ -155,6 +173,7 @@ const Player = () => {
                  : (
                   <Lrc
                     setCurrentLrc={setCurrentLrc}
+                    color={musicColor}
                     lrc={musicInfo.lrc || ''}
                     currentInfo={musicInfo || null}
                     currentTime={musicPlayingInfo.currentTime}
