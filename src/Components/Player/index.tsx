@@ -51,7 +51,7 @@ const Player = () => {
       }
       setTimeout(() => {
         musicPlaying()
-      }, 50)
+      }, 100)
       
     }
     dispatchMusic({
@@ -97,18 +97,6 @@ const Player = () => {
     }
   }, [musicPlayer])
 
-  // 歌曲暂停事件
-  const handlePause = useCallback(() => {
-    if (musicPlayer) {
-      musicPlayer.pause()
-      dispatchMusic({
-        type: 'update',
-        data: {
-          playing: false,
-        }
-      })
-    }
-  }, [musicPlayer])
 
   // 歌曲停止事件
   // const handleStop = useCallback(() => {
@@ -133,7 +121,15 @@ const Player = () => {
         })
         setTimeout(() => {
           requestAnimationFrame(musicPlaying)
-        }, 50)
+        }, 300)
+      } else {
+        musicPlayer.pause()
+        dispatchMusic({
+          type: 'update',
+          data: {
+            playing: false,
+          }
+        })
       }
     }
   }, [musicPlayer, musicPlaying])
@@ -158,13 +154,9 @@ const Player = () => {
   const keyDown = useCallback((event: any) => {
     const keyCode = event.keyCode as number
     if (keyCode === 32) {
-      if (musicData.playing) {
-        handlePause()
-      } else {
-        handelPlay()
-      }
+      handelPlay()
     }
-  }, [handelPlay, handlePause, musicData.playing])
+  }, [handelPlay])
 
   useEffect(() => {
     console.log('useEffect-getMusicInfo')
@@ -179,6 +171,7 @@ const Player = () => {
       setMusicPlayer(
         new Howl({
           src: URL.createObjectURL(musicInfo.music),
+          // src: 'http://qna13isfq.hn-bkt.clouddn.com/07.%E7%88%B7%E7%88%B7%E6%B3%A1%E7%9A%84%E8%8C%B6.flac',
           html5: true,
           format: [musicInfo.codec.toLowerCase()],
         })
@@ -223,7 +216,7 @@ const Player = () => {
                 </section>
                 <Control
                   handlePlay={handelPlay}
-                  handlePause={handlePause}
+                  handlePause={handelPlay}
                   currentInfo={musicInfo || null}
                   musicPlayingInfo={musicData}
                   currentTime={musicData.currentTime}
