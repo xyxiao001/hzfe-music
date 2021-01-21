@@ -107,7 +107,7 @@ const Lrc = (props: {
         {
           lrcList.map((lrcItem: InterfaceLrc, index) => (
             <p 
-              key={ lrcItem.time }
+              key={ `${lrcItem.time}${lrcIndex}${lrcItem.text}`}
               style={{
                 color: lrcIndex === index ? props.color : ''
               }}

@@ -225,6 +225,7 @@ const Player = () => {
                   handlePlay={handelPlay}
                   handlePause={handlePause}
                   currentInfo={musicInfo || null}
+                  musicPlayingInfo={musicData}
                   currentTime={musicData.currentTime}
                   handleChanging={handleChanging}
                   setChange={setChangeFromControl}

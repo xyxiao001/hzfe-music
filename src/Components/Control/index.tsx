@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './index.scss'
-import { InterfaceMusicInfo } from '../../Interface/music';
+import { InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../../Interface/music';
 import { formatTime } from '../../utils';
 import Progress from '../Progress';
 const Control = (props: {
@@ -11,16 +11,17 @@ const Control = (props: {
   handlePause: Function,
   handleChanging: Function,
   setChange: Function,
+  musicPlayingInfo: InterfaceMusicPlayingInfo
 }) => {
 
   const [range, setRange] = useState(0)
 
   useEffect(() => {
-    const allTime = props.currentInfo?.duration || 1
+    const allTime = props.currentInfo?.duration || props.musicPlayingInfo.duration || 0
     setRange(
       (props.currentTime / allTime) * 100
     )
-  }, [props.currentInfo, props.currentTime])
+  }, [props.currentInfo, props.currentTime, props.musicPlayingInfo.duration])
 
   return (
     <section className="player-control">
@@ -31,7 +32,7 @@ const Control = (props: {
       <section className="control-line">
         <section className="line-left">
           <span> {formatTime(props.currentTime || 0)} </span>
-          <span> {formatTime(props.currentInfo?.duration || 0)} </span>
+          <span> {formatTime(props.currentInfo?.duration ||  props.musicPlayingInfo.duration  || 0)} </span>
         </section>
         <section className="line-center">
           <p className="icon-play-bg" onClick={
