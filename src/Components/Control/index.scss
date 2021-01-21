@@ -9,7 +9,6 @@
 
   .control-line {
     display: flex;
-    align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
 
@@ -25,7 +24,7 @@
     display: flex;
     justify-content: space-between;
     opacity: .5;
-    line-height: 40px;
+    line-height: 30px;
   }
 
   .line-center {

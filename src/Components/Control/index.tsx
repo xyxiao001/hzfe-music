@@ -8,7 +8,9 @@ const Control = (props: {
   currentTime: number,
   isPlaying: boolean,
   handlePlay: Function,
-  handlePause: Function
+  handlePause: Function,
+  handleChanging: Function,
+  setChange: Function,
 }) => {
 
   const [range, setRange] = useState(0)
@@ -23,8 +25,8 @@ const Control = (props: {
   return (
     <section className="player-control">
       <section className="control-progress">
-        <Progress></Progress>
-        <span>歌曲进度百分比: { range.toFixed(2) }%</span>
+        <Progress range={ Number(range.toFixed(2)) } handleChanging={props.handleChanging} setChange={props.setChange}></Progress>
+        {/* <span>歌曲进度百分比: { range.toFixed(2) }%</span> */}
       </section>
       <section className="control-line">
         <section className="line-left">

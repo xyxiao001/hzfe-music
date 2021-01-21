@@ -57,5 +57,7 @@ export interface InterfaceMusicPlayingInfo {
   // 歌曲总时间
   duration: number
   // 歌曲正在播放时间
-  currentTime: number
+  currentTime: number,
+  // 当前是否处于变动中
+  change: boolean
 }

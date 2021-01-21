@@ -1,14 +1,15 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import './index.scss'
 import Upload from '../Upload'
 import localforage from 'localforage';
 import { Howl } from 'howler'
-import { InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../../Interface/music';
+import { InterfaceMusicInfo } from '../../Interface/music';
 import Lrc from '../Lrc';
 import Control from '../Control';
 import LrcWord from '../Lrc/Lrc-word';
 import FastAverageColor from 'fast-average-color';
 import { setLightness, setSaturation } from 'polished';
+import { initData, reducer } from '../../Mobx/music-reducer';
 
 const fac = new FastAverageColor();
 
@@ -20,14 +21,46 @@ const Player = () => {
 
   const [musicColor, setMusicColor] = useState('#52c41a')
 
-  // 当前歌曲播放信息
-  const [musicPlayingInfo, setMusicPlayingInfo] = useState<InterfaceMusicPlayingInfo>({
-    playing: false,
-    duration: 0,
-    currentTime: 0
-  })
-
   const [currentLrc, setCurrentLrc] = useState('')
+
+  const refChange = useRef('')
+
+  // 当前的状态, 用来做歌曲时间，还是当前拖动时间的判定
+  const [musicData, dispatchMusic] = useReducer(reducer, initData)
+
+  const handleChanging = (value: number) => {
+    // 当前拖动时间的改变
+    // 反推出当前时间
+    const time = (musicInfo?.duration || 0) * value / 100
+    dispatchMusic(
+      {
+        type: 'update',
+        data: {
+          currentTime: time
+        }
+      }
+    )
+  }
+
+  const setChangeFromControl = (key: boolean) => {
+    if (!key) {
+      // 表示操作结束，开始同步数据，播放
+      musicPlayer?.seek(musicData.currentTime)
+      if (!musicData.playing) {
+        musicPlayer?.play()
+      }
+      setTimeout(() => {
+        musicPlaying()
+      }, 50)
+      
+    }
+    dispatchMusic({
+      type: 'change',
+      data: {
+        change: key
+      }
+    })
+  }
 
   const getInfoFormLocal = async () => {
     return new Promise((resolve, reject) => {
@@ -48,24 +81,32 @@ const Player = () => {
 
   // 歌曲正在播放哦
   const musicPlaying = useCallback(() => {
+    if (refChange.current) return
     if (musicPlayer) {
-      const time = musicPlayer.seek() as number
-      setMusicPlayingInfo({
-        ...musicPlayingInfo,
-        duration: musicPlayer.duration(),
-        playing: musicPlayer.playing(),
-        currentTime: time
+      dispatchMusic({
+        type: 'update',
+        data: {
+          duration: musicPlayer.duration(),
+          playing: musicPlayer.playing(),
+          currentTime: musicPlayer.seek()
+        }
       })
       if (musicPlayer.playing()) {
         requestAnimationFrame(musicPlaying)
       }
     }
-  }, [musicPlayer, musicPlayingInfo])
+  }, [musicPlayer])
 
   // 歌曲暂停事件
   const handlePause = useCallback(() => {
     if (musicPlayer) {
       musicPlayer.pause()
+      dispatchMusic({
+        type: 'update',
+        data: {
+          playing: false,
+        }
+      })
     }
   }, [musicPlayer])
 
@@ -82,18 +123,20 @@ const Player = () => {
       if (!musicPlayer.playing()) {
         musicPlayer.play()
         const time = musicPlayer.seek() as number
-        setMusicPlayingInfo({
-          ...musicPlayingInfo,
-          duration: musicPlayer.duration(),
-          playing: musicPlayer.playing(),
-          currentTime: time
+        dispatchMusic({
+          type: 'update',
+          data: {
+            duration: musicPlayer.duration(),
+            playing: true,
+            currentTime: time
+          }
         })
         setTimeout(() => {
           requestAnimationFrame(musicPlaying)
-        }, 300)
+        }, 50)
       }
     }
-  }, [musicPlayer, musicPlaying, musicPlayingInfo])
+  }, [musicPlayer, musicPlaying])
 
   const getMusicInfo = useCallback(async () => {
     const info: InterfaceMusicInfo = await getInfoFormLocal() as InterfaceMusicInfo
@@ -110,6 +153,18 @@ const Player = () => {
       )
     });
   }, [])
+
+  // 绑定键盘事件
+  const keyDown = useCallback((event: any) => {
+    const keyCode = event.keyCode as number
+    if (keyCode === 32) {
+      if (musicData.playing) {
+        handlePause()
+      } else {
+        handelPlay()
+      }
+    }
+  }, [handelPlay, handlePause, musicData.playing])
 
   useEffect(() => {
     console.log('useEffect-getMusicInfo')
@@ -130,6 +185,18 @@ const Player = () => {
       )
     }
   }, [musicInfo, musicPlayer])
+
+  useEffect(() => {
+    refChange.current = musicData.change
+  })
+
+  useEffect(() => {
+    // 绑定enter 事件
+    window.addEventListener('keydown', keyDown)
+    return () => {
+      window.removeEventListener('keydown', keyDown)
+    }
+  }, [keyDown])
 
 
   return (
@@ -158,8 +225,10 @@ const Player = () => {
                   handlePlay={handelPlay}
                   handlePause={handlePause}
                   currentInfo={musicInfo || null}
-                  currentTime={musicPlayingInfo.currentTime}
-                  isPlaying={musicPlayingInfo.playing}></Control>
+                  currentTime={musicData.currentTime}
+                  handleChanging={handleChanging}
+                  setChange={setChangeFromControl}
+                  isPlaying={musicData.playing}></Control>
               </section>
               <section className="player-right">
                 {
@@ -169,8 +238,8 @@ const Player = () => {
                       color={musicColor}
                       lrc={musicInfo.lrc || ''}
                       currentInfo={musicInfo || null}
-                      currentTime={musicPlayingInfo.currentTime}
-                      isPlaying={musicPlayingInfo.playing}></LrcWord>
+                      currentTime={musicData.currentTime}
+                      isPlaying={musicData.playing}></LrcWord>
                     )
                  : (
                   <Lrc
@@ -178,8 +247,8 @@ const Player = () => {
                     color={musicColor}
                     lrc={musicInfo.lrc || ''}
                     currentInfo={musicInfo || null}
-                    currentTime={musicPlayingInfo.currentTime}
-                    isPlaying={musicPlayingInfo.playing}></Lrc>
+                    currentTime={musicData.currentTime}
+                    isPlaying={musicData.playing}></Lrc>
                  )
                 }
               </section>
@@ -187,9 +256,9 @@ const Player = () => {
         }
       </section>
       {/* <section className="music-log">
-         <p>歌曲播放状态 {musicPlayingInfo.playing ? '播放中' : '没有播放'}</p>
-          <p>歌曲总时长 {formatTime(musicPlayingInfo.duration)}</p>
-          <p>歌曲当前时间 {formatTime(musicPlayingInfo.currentTime)}</p>
+         <p>歌曲播放状态 {musicData.playing ? '播放中' : '没有播放'}</p>
+          <p>歌曲总时长 {formatTime(musicData.duration)}</p>
+          <p>歌曲当前时间 {formatTime(musicData.currentTime)}</p>
       </section> */}
       {/* 这里是歌曲控制台的 */}
     </section>
