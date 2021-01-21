@@ -70,6 +70,7 @@ const Player = () => {
         localforage.getItem('musicLrc'),
       ]).then(res => {
         const obj: InterfaceMusicInfo = res[0] as InterfaceMusicInfo
+        if (!obj) resolve(null)
         obj.music = res[1] as Blob
         obj.lrc = res[2] as string
         resolve(obj)
@@ -136,6 +137,7 @@ const Player = () => {
 
   const getMusicInfo = useCallback(async () => {
     const info: InterfaceMusicInfo = await getInfoFormLocal() as InterfaceMusicInfo
+    if (!info) return
     setMusicInfo(info)
     fac.getColorAsync(info.picture[0])
     .then(color => {
