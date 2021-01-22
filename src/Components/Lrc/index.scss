@@ -23,7 +23,7 @@
       margin-bottom: 0;
       transition: all 0.2s ease-in-out;
       opacity: .4;
-      font-weight: 500;
+      font-weight: 400;
     }
 
     &:first-child {
@@ -31,12 +31,13 @@
     }
 
     &:last-child {
-      margin-bottom: 30vh;
+      margin-bottom: 60vh;
     }
   }
 
   p.choose-lrc {
     opacity: 1;
+    font-weight: 600;
     // text-shadow: 0 0 1px white, 0 0 1px #00FFFF, 0 0 5px #7FFF00, 0 0 2px white;
   }
 }

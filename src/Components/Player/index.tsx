@@ -142,7 +142,7 @@ const Player = () => {
     fac.getColorAsync(info.picture[0])
     .then(color => {
         setMusicColor(
-          setSaturation(.5, setLightness(.5, color.rgba))
+          setSaturation(.8, setLightness(.5, color.rgba))
         )
     })
     .catch(e => {
