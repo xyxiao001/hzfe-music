@@ -253,7 +253,7 @@ export const goScroll = (top: number, target: HTMLElement) => {
     return
   }
   // 持续时间
-  const d = 10
+  const d = 32
   const step = () => {
     let top = Tween.Linear(t, b, c, d)
     target.scrollTo({

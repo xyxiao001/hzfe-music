@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import './index.scss'
-import Upload from '../Upload'
+// import Upload from '../Upload'
 import localforage from 'localforage';
 import { Howl } from 'howler'
 import { InterfaceMusicInfo } from '../../Interface/music';
@@ -84,15 +84,15 @@ const Player = () => {
   const musicPlaying = useCallback(() => {
     if (refChange.current) return
     if (musicPlayer) {
-      dispatchMusic({
-        type: 'update',
-        data: {
-          duration: musicPlayer.duration(),
-          playing: musicPlayer.playing(),
-          currentTime: musicPlayer.seek()
-        }
-      })
       if (musicPlayer.playing()) {
+        dispatchMusic({
+          type: 'update',
+          data: {
+            duration: musicPlayer.duration(),
+            playing: musicPlayer.playing(),
+            currentTime: musicPlayer.seek()
+          }
+        })
         requestAnimationFrame(musicPlaying)
       }
     }
@@ -173,11 +173,20 @@ const Player = () => {
       setMusicPlayer(
         new Howl({
           src: URL.createObjectURL(musicInfo.music),
+          // src: 'https://jay-music1.oss-cn-beijing.aliyuncs.com/01.%E7%88%B1%E5%9C%A8%E8%A5%BF%E5%85%83%E5%89%8D.flac?Expires=1611355123&OSSAccessKeyId=TMP.3KgLmqPNAzpF5wPEETMh2Dq86Wcz5FyeAHsHEtGksuQw9c7y5jm7LQWDLJ2Vv1cbwnpfTdrM8S4K19VLMAmCX51Cp1tbeD&Signature=zSC5jpvQqvd1BCBjjXGwUMT0g%2Bw%3D',
           // src: 'http://qna13isfq.hn-bkt.clouddn.com/07.%E7%88%B7%E7%88%B7%E6%B3%A1%E7%9A%84%E8%8C%B6.flac',
           html5: true,
           format: [musicInfo.codec.toLowerCase()],
+          volume: .5
         })
       )
+    }
+    return () => {
+      if (musicPlayer) {
+        console.log('created destroy')
+        musicPlayer.stop()
+        setMusicPlayer(null)
+      }
     }
   }, [musicInfo, musicPlayer])
 
@@ -198,7 +207,7 @@ const Player = () => {
     <section className="player">
       <section className="player-bg" style={{ "backgroundImage": `url(${musicInfo?.picture[0] || process.env.PUBLIC_URL + '/images/music-no.jpeg'})` }}></section>
       <section className="player-fade"></section>
-      <Upload></Upload>
+      {/* <Upload></Upload> */}
       {/* 这里去渲染歌曲信息 */}
       <section className="player-layout">
         {

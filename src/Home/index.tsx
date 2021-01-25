@@ -1,5 +1,7 @@
 import React from 'react';
-import Player from '../Components/Player'
+import { NavLink, Route, Switch } from 'react-router-dom';
+import Locale from '../Local';
+import Love from '../Love';
 import './index.scss'
 const Home = () => {
 
@@ -7,14 +9,27 @@ const Home = () => {
     <section className="page-home">
       <section className="wrapper-box">
         <section className="nav">
-          <p className="nav-item">Music</p>
-          <p className="nav-item">Album</p>
+          <p className="nav-item">
+            <NavLink to="/" exact>推荐</NavLink>
+          </p>
+          <p className="nav-item">
+            <NavLink to="/local">本地音乐</NavLink>
+          </p>
+          <p className="nav-item">
+            <NavLink to="/player">播放器</NavLink>
+          </p>
         </section>
         <section className="music-box">
-          music-box
+          <Switch>
+            <Route path="/local" exact>
+              <Locale />
+            </Route>
+            <Route path="/" exact>
+              <Love />
+            </Route>
+          </Switch>
         </section>
       </section>
-      <Player></Player>
     </section>
   );
 }

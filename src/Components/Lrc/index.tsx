@@ -50,6 +50,7 @@ const Lrc = (props: {
           top,
           behavior: 'smooth'
         })
+        // goScroll(top, target)
       }
     }
   }, [canScroll, lineHeight, lrcIndex, props.isPlaying])
@@ -91,7 +92,6 @@ const Lrc = (props: {
         setCanScroll(false)
       }}
       onMouseLeave={() => {
-        setCanScroll(true)
         if (!props.isPlaying) return
         const target: any = lrcScroll.current
         const top = lineHeight * (lrcIndex - topLine) || 0
@@ -101,6 +101,7 @@ const Lrc = (props: {
             behavior: 'auto'
           })
         }
+        setCanScroll(true)
       }}>
       {/* 渲染歌词列表 */}
       <section className="lrc-list">
