@@ -1,4 +1,3 @@
-import { iterate } from "localforage";
 
 // 歌曲储存信息
 export interface InterfaceMusicInfo {
@@ -24,8 +23,10 @@ export interface InterfaceMusicInfo {
   duration: number
   // 歌曲采样率
   sampleRate: string
-  // 对应的歌词信息
-  lrc?: string
+  // 对应的歌词真正的信息
+  lrc?: string,
+  // 对应的歌词的名称
+  lrcKey?: string
   // 真实歌曲
   music?: Blob
   // 歌曲流 hash 值，用于查询歌曲流

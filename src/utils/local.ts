@@ -15,21 +15,14 @@
  */
 
 import localforage from 'localforage'
-import { InterfaceLrcInfo } from '../Interface/music'
-
-  /**
-  * 添加一首歌的存储方法
-  */
- export const addMusic =  () => {
-   console.log(localforage)
- }
+import { InterfaceLrcInfo, InterfaceMusicInfo } from '../Interface/music'
 
  /**
   * 添加歌词的存储方法
-  * key: music-lrc
+  * key: music-lrc-list
   */
  export const addLrc = async (lrc: InterfaceLrcInfo):Promise<any> => {
-    const key = 'music-lrc'
+    const key = 'music-lrc-list'
     // 歌词，直接拉出列表，然后塞进去，储存
     const list: InterfaceLrcInfo[] = await localforage.getItem(key)  || []
     // 这里需要判断下是否已经存在
@@ -37,12 +30,58 @@ import { InterfaceLrcInfo } from '../Interface/music'
     if (noExist) {
       list.push(lrc)
     }
-    return localforage.setItem('music-lrc', list)
+    return localforage.setItem('music-lrc-list', list)
 }
 
 // 获取歌词列表
 export const getLrcList = async ():Promise<InterfaceLrcInfo[]>  => {
-  const key = 'music-lrc'
+  const key = 'music-lrc-list'
   const list: InterfaceLrcInfo[] = await localforage.getItem(key)  || []
   return list
 }
+
+/**
+ * 添加歌曲列表方法
+ * music-list
+ * 具体流地址 music-名称生成的hash 值
+ */
+
+export const addMusic = async (musicInfo: InterfaceMusicInfo, blob: Blob):Promise<any> => {
+  const key = 'music-list'
+  // 歌词，直接拉出列表，然后塞进去，储存
+  const list: InterfaceMusicInfo[] = await localforage.getItem(key)  || []
+  // 这里需要判断下是否已经存在
+  let noExist = list.every(item => item.fileName !== musicInfo.fileName)
+  if (noExist) {
+    // 这里需要去存储文件流
+    const musicHash = `${musicInfo.fileName}-${Math.random() * 100}-${Date.now()}`
+    musicInfo.id = musicHash
+    await localforage.setItem(musicHash, blob)
+    list.push(musicInfo)
+  }
+  return localforage.setItem('music-list', list)
+}
+
+// 获取歌曲列表
+export const getMusicList = async ():Promise<InterfaceMusicInfo[]>  => {
+  const key = 'music-list'
+  const list: InterfaceMusicInfo[] = await localforage.getItem(key)  || []
+  return list
+}
+
+// 获取单首歌词信息
+export const getMusicInfoFromLocal = async (id: string): Promise<InterfaceMusicInfo> => {
+  return new Promise(async (resolve, reject) => {
+    const list = await localforage.getItem('music-list') as InterfaceMusicInfo[]
+    const cur = list.filter((item: InterfaceMusicInfo) => item.id === id)[0]
+    if (!cur) {
+      reject('获取歌曲信息失败')
+    } else {
+      cur.music = await localforage.getItem(id)  as Blob
+      if (cur.lrcKey) {
+        cur.lrc = await localforage.getItem(cur.lrcKey) as string
+      }
+      resolve(cur)
+    }
+  })
+} 

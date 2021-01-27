@@ -4,6 +4,7 @@ import { Tabs } from 'antd';
 import LrcList from "../Components/LrcList";
 import { useHistory, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import MusicList from "../Components/MusicList";
 
 const { TabPane } = Tabs;
 
@@ -43,7 +44,7 @@ const Locale = () => {
       <section className="local-content">
         <Tabs activeKey={key} onChange={tabCallback}>
           <TabPane tab="音乐列表" key="music">
-            Content of Tab Pane 1
+            <MusicList />
           </TabPane>
           <TabPane tab="歌词列表" key="lrc">
             <LrcList />

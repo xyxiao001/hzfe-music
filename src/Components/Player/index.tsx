@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import './index.scss'
 // import Upload from '../Upload'
-import localforage from 'localforage';
 import { Howl } from 'howler'
 import { InterfaceMusicInfo } from '../../Interface/music';
 import Lrc from '../Lrc';
@@ -10,6 +9,7 @@ import LrcWord from '../Lrc/Lrc-word';
 import FastAverageColor from 'fast-average-color';
 import { setLightness, setSaturation } from 'polished';
 import { initData, reducer } from '../../Mobx/music-reducer';
+import { getMusicInfoFromLocal } from '../../utils/local';
 
 const fac = new FastAverageColor();
 
@@ -63,20 +63,13 @@ const Player = () => {
   }
 
   const getInfoFormLocal = async () => {
-    return new Promise((resolve, reject) => {
-      Promise.all([
-        localforage.getItem('music'),
-        localforage.getItem('musicData'),
-        localforage.getItem('musicLrc'),
-      ]).then(res => {
-        const obj: InterfaceMusicInfo = res[0] as InterfaceMusicInfo
-        if (!obj) resolve(null)
-        obj.music = res[1] as Blob
-        obj.lrc = res[2] as string
-        resolve(obj)
-      }).catch(err => {
-        reject(err)
-      })
+    return new Promise(async (resolve, reject) => {
+      const res = await getMusicInfoFromLocal('02.七里香-99.42046244504539-1611753236468')
+      if (res) {
+        resolve(res)
+      } else {
+        reject('获取失败')
+      }
     })
   }
 

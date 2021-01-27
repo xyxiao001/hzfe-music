@@ -7,7 +7,7 @@ import './index.scss'
 import { supportMusicFormat, supportMusicLrcFormat } from '../../config'
 import filesize from 'filesize'
 import { InterfaceMusicInfo } from '../../Interface/music';
-import { addLrc } from '../../utils/local';
+import { addLrc, addMusic } from '../../utils/local';
 
 const UploadFile = () => {
   
@@ -56,7 +56,15 @@ const UploadFile = () => {
       return
     }
     const data: InterfaceMusicInfo = transformMusicInfo(result)
-    console.log(data, blob)
+    data.fileName = FileName
+    data.fileType = FileType
+    data.fileSize = filesize(File.size)
+    data.size = File.size
+    data.name = data.name || data.fileName || '未知歌曲'
+    addMusic(data, blob).then(res => {
+      console.log(res)
+      message.success(`${File.name}  上传成功`)
+    })
   }
 
   // 歌词文件处理
