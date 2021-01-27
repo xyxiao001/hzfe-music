@@ -79,9 +79,37 @@ export const getMusicInfoFromLocal = async (id: string): Promise<InterfaceMusicI
     } else {
       cur.music = await localforage.getItem(id)  as Blob
       if (cur.lrcKey) {
-        cur.lrc = await localforage.getItem(cur.lrcKey) as string
+         const lrcList = await getLrcList()
+         lrcList.forEach(item => {
+           if (item.fileName === cur.lrcKey) {
+            cur.lrc = item.content
+           }
+         })
       }
       resolve(cur)
     }
   })
 } 
+
+// 自动管理歌曲歌词
+export const MusicRelatedLrc = (): Promise<string> => {
+  return new Promise(async(resolve, reject) => {
+    try {
+      let musicList = await getMusicList()
+      const lrcList = await getLrcList()
+      musicList = musicList.map((item: InterfaceMusicInfo) => {
+        lrcList.forEach((lrc: InterfaceLrcInfo) => {
+          if (lrc.fileName.includes(item.name)) {
+            item.lrcKey = lrc.fileName
+          }
+        })
+        return item
+      })
+      // console.log(musicList)
+      await localforage.setItem('music-list', musicList)
+      resolve('success')
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
