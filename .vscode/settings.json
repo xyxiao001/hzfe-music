@@ -3,6 +3,7 @@
     "Mobx",
     "Popconfirm",
     "albumartist",
+    "filesize",
     "flac",
     "hzfe",
     "jsmediatags",

@@ -4,6 +4,8 @@ import './index.scss';
 import App from './App';
 import 'antd/dist/antd.css';
 import localforage from 'localforage';
+import { ConfigProvider } from 'antd';
+import zh_CN from 'antd/lib/locale-provider/zh_CN';
 
 localforage.config({
   name: 'HZFE-MUSIC',
@@ -12,7 +14,9 @@ localforage.config({
 
 
 ReactDOM.render(
-  <App />,
+  <ConfigProvider locale={zh_CN}>
+    <App />
+  </ConfigProvider>,
   // <React.StrictMode>
   // </React.StrictMode>,
   document.getElementById('root')

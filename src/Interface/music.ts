@@ -26,12 +26,25 @@ export interface InterfaceMusicInfo {
   sampleRate: string
   // 对应的歌词信息
   lrc?: string
-  // 对应的歌词hash 值，用作查询关联
-  lrcHash?: string
   // 真实歌曲
-  music?: Blob,
+  music?: Blob
   // 歌曲流 hash 值，用于查询歌曲流
-  musicHash?: string 
+  id?: string 
+  // 文件读取的信息
+  fileName?: string
+  fileType?: string
+  fileSize?: string
+  size?: number
+}
+
+export interface InterfaceLrcInfo {
+  // 歌词详情
+  content: string
+  // 文件读取的信息
+  fileName: string
+  fileType: string
+  fileSize: string,
+  size: number
 }
 
 // 歌词信息

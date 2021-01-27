@@ -44,11 +44,10 @@
   sampleRate: string
   // 对应的歌词信息
   lrc: string
-  lrcHash: string
   // 真实歌曲
   music?: Blob
   // 歌曲流 hash 值，用于查询歌曲流
-  musicHash?: string 
+  id?: string 
 ```
 
 ### music-hash 歌曲信息列表
