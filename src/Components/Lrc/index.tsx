@@ -35,7 +35,7 @@ const Lrc = (props: {
     setLrcIndex(
       getChooseLrcIndex(lrcList, props.currentTime)
     )
-    if (lrcList[lrcIndex]) {
+    if (lrcList.length && lrcList[lrcIndex]) {
       props.setCurrentLrc(lrcList[lrcIndex].text)
     }
   }, [lrcIndex, lrcList, props, props.currentTime])
