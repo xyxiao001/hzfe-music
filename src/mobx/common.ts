@@ -9,6 +9,9 @@ class Common {
   @action
   createdPlayer () {
     if (this.musicInfo) {
+      this.updatedMusicData({
+        playing: false,
+      })
       this.musicPlayer = new Howl({
         autoplay: true,
         src: URL.createObjectURL(this.musicInfo.music),
@@ -25,7 +28,8 @@ class Common {
   handlePlay = () => {
     console.log('歌曲播放了')
     this.updatedMusicData({
-      playing: true
+      currentTime: this.musicPlayer?.seek(),
+      playing: true,
     })
   }
 

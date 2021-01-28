@@ -195,7 +195,7 @@ const Player = observer(() => {
     <section className="player">
       {
         musicData.min ? (
-          <section className="player-min" style={{color: musicColor, backgroundColor: musicBgColor}}>
+          <section className="player-min" style={{color: musicColor}}>
             {
               musicInfo ? (
                 <section className="player-layout">
