@@ -153,7 +153,9 @@ const Player = observer(() => {
     return () => {
       if (musicPlayer) {
         console.log('created destroy')
-        musicPlayer.stop()
+        common.updatedMusicData({
+          playing: false
+        })
         common.destroyPlayer()
       }
     }
@@ -165,7 +167,6 @@ const Player = observer(() => {
 
   useEffect(() => {
     if (musicData.playing) {
-      console.log('播放器开始--')
       musicPlaying()
     }
   }, [musicData.playing, musicPlaying])

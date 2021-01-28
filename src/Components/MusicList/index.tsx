@@ -98,9 +98,12 @@ const MusicList = observer(() => {
 
   const handlePlayClick = (item: InterfaceMusicInfo) => {
     if (item.id !== musicData.id) {
-      common.updatedMusicData({
-        id: item.id
-      })
+      common.musicPlayer?.stop()
+      setTimeout(() => {
+        common.updatedMusicData({
+          id: item.id
+        })
+      }, 100)
     } else {
       if (common.musicPlayer) {
         common.musicPlayer.play()

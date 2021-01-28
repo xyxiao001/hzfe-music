@@ -22,7 +22,8 @@ class Common {
         volume: 1,
         onplay: this.handlePlay,
         onpause: this.handlePause,
-        onend: this.handleEnd
+        onend: this.handleEnd,
+        onstop: this.handleStop
       })
     }
   }
@@ -53,6 +54,14 @@ class Common {
     })
   }
 
+  handleStop = () => {
+    console.log('歌曲停止')
+    this.updatedMusicData({
+      currentTime: this.musicPlayer?.seek(),
+      playing: false,
+    })
+  }
+
   @action
   destroyPlayer () {
     this.musicPlayer = null
@@ -64,6 +73,9 @@ class Common {
 
   @action
   updatedMusicInfo (data: InterfaceMusicInfo) {
+    if (data.picture.length === 0) {
+      data.picture = [`${process.env.PUBLIC_URL}/images/music-no.jpeg`]
+    }
     this.musicInfo = data
   }
   
