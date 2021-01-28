@@ -27,8 +27,6 @@ const Player = observer(() => {
 
   const [musicColor, setMusicColor] = useState('#52c41a')
 
-  // 背景颜色
-  const [musicBgColor, setMusicBgColor] = useState('#fff1f0')
 
   const [currentLrc, setCurrentLrc] = useState('')
 
@@ -101,17 +99,8 @@ const Player = observer(() => {
     if (musicPlayer) {
       if (!musicPlayer.playing()) {
         musicPlayer.play()
-        const time = musicPlayer.seek() as number
-        common.updatedMusicData({
-          duration: musicPlayer.duration(),
-            playing: true,
-            currentTime: time
-        })
       } else {
         musicPlayer.pause()
-        common.updatedMusicData({
-          playing: false,
-        })
       }
     }
   }, [musicPlayer])
@@ -122,7 +111,6 @@ const Player = observer(() => {
     common.updatedMusicInfo(info)
     fac.getColorAsync(info.picture[0])
       .then(color => {
-        setMusicBgColor(color.rgba)
         setMusicColor(
           setSaturation(.8, setLightness(.5, color.rgba))
         )

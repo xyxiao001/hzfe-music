@@ -20,7 +20,9 @@ class Common {
         html5: true,
         format: [this.musicInfo.codec.toLowerCase()],
         volume: 1,
-        onplay: this.handlePlay
+        onplay: this.handlePlay,
+        onpause: this.handlePause,
+        onend: this.handleEnd
       })
     }
   }
@@ -29,7 +31,25 @@ class Common {
     console.log('歌曲播放了')
     this.updatedMusicData({
       currentTime: this.musicPlayer?.seek(),
+      duration: this.musicPlayer?.duration(),
       playing: true,
+      change: false
+    })
+  }
+
+  handlePause = () => {
+    console.log('歌曲暂停了')
+    this.updatedMusicData({
+      currentTime: this.musicPlayer?.seek(),
+      playing: false,
+    })
+  }
+
+  handleEnd = () => {
+    console.log('歌曲播放完了')
+    this.updatedMusicData({
+      currentTime: this.musicPlayer?.seek(),
+      playing: false,
     })
   }
 

@@ -2,9 +2,15 @@
   .list-play {
     display: flex;
     align-items: center;
-    vertical-align: baseline;
     margin-bottom: 0;
     height: 30px;
+    line-height: 30px;
+
+    >span {
+      display: flex;
+      align-items: center;
+    }
+
     .icon {
       font-size: 18px;
       margin-right: 5px;

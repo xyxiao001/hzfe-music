@@ -5,10 +5,11 @@ import { InterfaceMusicInfo } from "../../Interface/music"
 import { formatTime } from "../../utils"
 import { getMusicList } from "../../utils/local"
 import { observer } from "mobx-react"
-import { PlayCircleOutlined } from "@ant-design/icons"
+import { PauseCircleOutlined, PlayCircleOutlined } from "@ant-design/icons"
 import './index.scss'
 import common from "../../Mobx/common"
 const MusicList = observer(() => {
+  const musicData = common.musicData
   const columns = [
     {
       title: '歌曲',
@@ -17,7 +18,18 @@ const MusicList = observer(() => {
       render: (name: string, row: InterfaceMusicInfo) => 
         (
           <p className="list-play">
-            <PlayCircleOutlined className="icon" onClick={() => handlePlayClick(row)}/>
+            {
+              (musicData?.id === row.id && musicData.playing) ?
+              (
+                <span>
+                  <PauseCircleOutlined className="icon" onClick={() => handlePauseClick()} />
+                </span>
+              ) : (
+                <span>
+                  <PlayCircleOutlined className="icon" onClick={() => handlePlayClick(row)}/>
+                </span>
+              )
+            }
             <span>{ name}</span>
           </p>
         )
@@ -85,9 +97,20 @@ const MusicList = observer(() => {
   )
 
   const handlePlayClick = (item: InterfaceMusicInfo) => {
-    common.updatedMusicData({
-      id: item.id
-    })
+    if (item.id !== musicData.id) {
+      common.updatedMusicData({
+        id: item.id
+      })
+    } else {
+      if (common.musicPlayer) {
+        common.musicPlayer.play()
+      }
+    }
+    
+  }
+
+  const handlePauseClick = () => {
+    common.musicPlayer?.pause()
   }
 
   useEffect(() => {
