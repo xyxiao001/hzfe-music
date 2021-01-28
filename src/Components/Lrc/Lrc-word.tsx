@@ -96,7 +96,9 @@ const LrcWord = (props: {
       }}
       onMouseLeave={() => {
         setCanScroll(true)
-        if (!props.isPlaying) return
+        if (!props.isPlaying) {
+          return
+        }
         const target: any = lrcScroll.current
         const top = lineHeight * (lrcIndex - topLine) || 0
         if (target) {
