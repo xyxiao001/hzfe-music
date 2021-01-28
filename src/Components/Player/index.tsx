@@ -201,7 +201,7 @@ const Player = observer(() => {
                 <section className="player-layout">
                   <section className="layout-left">
                     <section className="music-img" onClick={handelChangeSize}>
-                      <img src={musicInfo.picture[0] || process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
+                      <img src={musicInfo.picture.length > 0 ? musicInfo.picture[0]  : process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
                     </section>
                     <section className="player-info">
                       <p className="music-name">{musicInfo.name}</p>
@@ -244,7 +244,7 @@ const Player = observer(() => {
 
                       <section className="player-left">
                         <section className="player-line">
-                          <img src={musicInfo.picture[0] || process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
+                          <img src={musicInfo.picture.length > 0 ? musicInfo.picture[0]  : process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
                         </section>
                         <section className="player-line">
                           <section className="player-info">

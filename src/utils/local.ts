@@ -72,7 +72,7 @@ export const getMusicList = async ():Promise<InterfaceMusicInfo[]>  => {
 // 获取单首歌词信息
 export const getMusicInfoFromLocal = async (id: string): Promise<InterfaceMusicInfo> => {
   return new Promise(async (resolve, reject) => {
-    const list = await localforage.getItem('music-list') as InterfaceMusicInfo[]
+    const list = await localforage.getItem('music-list') as InterfaceMusicInfo[] || []
     const cur = list.filter((item: InterfaceMusicInfo) => item.id === id)[0]
     if (!cur) {
       reject('获取歌曲信息失败')
