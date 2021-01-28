@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, Route, Switch } from 'react-router-dom';
+import Player from '../Components/Player';
 import Locale from '../Local';
 import Love from '../Love';
 import './index.scss'
@@ -15,9 +16,6 @@ const Home = () => {
           <p className="nav-item">
             <NavLink to="/local">本地音乐</NavLink>
           </p>
-          <p className="nav-item">
-            <NavLink to="/player">播放器</NavLink>
-          </p>
         </section>
         <section className="music-box">
           <Switch>
@@ -30,6 +28,7 @@ const Home = () => {
           </Switch>
         </section>
       </section>
+      <Player />
     </section>
   );
 }

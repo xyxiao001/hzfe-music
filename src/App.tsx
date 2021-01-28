@@ -6,7 +6,6 @@ import {
 } from "react-router-dom";
 import Home from './Home';
 import './App.scss'
-import Player from './Components/Player';
 
 // function PrivateRoute({ children, ...rest }: any) {
 //   return (
@@ -36,9 +35,6 @@ function App() {
         <Switch>
           <Route path="/" exact>
             <Home />
-          </Route>
-          <Route path="/player" exact>
-            <Player />
           </Route>
           <Route path="*" exact>
             <Home />

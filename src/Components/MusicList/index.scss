@@ -1,0 +1,19 @@
+.lrc-list {
+  .list-play {
+    display: flex;
+    align-items: center;
+    vertical-align: baseline;
+    margin-bottom: 0;
+    height: 30px;
+    .icon {
+      font-size: 18px;
+      margin-right: 5px;
+      cursor: pointer;
+      transition: all .2s ease-in;
+
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+  }
+}

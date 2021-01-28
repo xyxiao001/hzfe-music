@@ -4,14 +4,23 @@ import React, { useCallback, useEffect, useState } from "react"
 import { InterfaceMusicInfo } from "../../Interface/music"
 import { formatTime } from "../../utils"
 import { getMusicList } from "../../utils/local"
-
-
-const MusicList = () => {
+import { observer } from "mobx-react"
+import { PlayCircleOutlined } from "@ant-design/icons"
+import './index.scss'
+import common from "../../Mobx/common"
+const MusicList = observer(() => {
   const columns = [
     {
       title: '歌曲',
       dataIndex: 'name',
       key: 'name',
+      render: (name: string, row: InterfaceMusicInfo) => 
+        (
+          <p className="list-play">
+            <PlayCircleOutlined className="icon" onClick={() => handlePlayClick(row)}/>
+            <span>{ name}</span>
+          </p>
+        )
     },
     {
       title: '歌手',
@@ -75,6 +84,12 @@ const MusicList = () => {
     [],
   )
 
+  const handlePlayClick = (item: InterfaceMusicInfo) => {
+    common.updatedMusicData({
+      id: item.id
+    })
+  }
+
   useEffect(() => {
     getList()
   }, [getList])
@@ -84,6 +99,6 @@ const MusicList = () => {
       <Table dataSource={list} columns={columns} pagination={false} rowKey="fileName" loading={loading} />
     </section>
   )
-}
+})
 
 export default MusicList

@@ -35,7 +35,7 @@ const Progress = (props: {
 
   return (
     <section className="progress">
-       <Slider defaultValue={0} value={value} onChange={onChange} onAfterChange={onAfterChange} />
+       <Slider defaultValue={0} value={value} onChange={onChange} onAfterChange={onAfterChange} tooltipVisible={false} />
     </section>
   )
 }

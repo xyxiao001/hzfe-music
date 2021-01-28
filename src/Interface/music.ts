@@ -66,6 +66,7 @@ export interface InterfaceLrcWord {
 
 // 歌曲播放信息状态储存
 export interface InterfaceMusicPlayingInfo {
+  id: string
   // 是否处于播放中
   playing: boolean
   // 歌曲总时间
@@ -73,5 +74,7 @@ export interface InterfaceMusicPlayingInfo {
   // 歌曲正在播放时间
   currentTime: number,
   // 当前是否处于变动中
-  change: boolean
+  change: boolean,
+  // 当前播放器状态
+  min: boolean
 }
