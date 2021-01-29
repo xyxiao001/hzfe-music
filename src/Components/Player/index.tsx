@@ -10,7 +10,7 @@ import { setLightness, setSaturation } from 'polished';
 import { getMusicInfoFromLocal } from '../../utils/local';
 import { DownOutlined } from '@ant-design/icons';
 import { observer } from "mobx-react"
-import common from '../../Mobx/common';
+import common from '../../store/common';
 
 const fac = new FastAverageColor();
 

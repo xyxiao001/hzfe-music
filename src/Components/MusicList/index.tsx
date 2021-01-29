@@ -7,7 +7,7 @@ import { getMusicList } from "../../utils/local"
 import { observer } from "mobx-react"
 import { PauseCircleOutlined, PlayCircleOutlined } from "@ant-design/icons"
 import './index.scss'
-import common from "../../Mobx/common"
+import common from "../../store/common"
 const MusicList = observer(() => {
   const musicData = common.musicData
   const columns = [
