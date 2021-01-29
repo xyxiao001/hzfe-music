@@ -67,7 +67,6 @@ class Common {
     if (!this.musicData.change && this.musicPlayer && this.musicPlayer.playing()) {
       this.updatedMusicData({
         type: 'update',
-        duration: this.musicPlayer.duration(),
         currentTime: this.musicPlayer.seek()
       })
       requestAnimationFrame(this.handlePlaying)
@@ -107,7 +106,6 @@ class Common {
   @action
   updatedMusicData (data: any) {
     if (data.type === 'update') {
-      this.musicData.duration = data.duration
       this.musicData.currentTime = data.currentTime
       return
     }
