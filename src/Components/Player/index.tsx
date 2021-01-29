@@ -50,10 +50,6 @@ const Player = observer(() => {
       if (!musicData.playing) {
         musicPlayer?.play()
       }
-      setTimeout(() => {
-        musicPlaying()
-      }, 100)
-
     }
     common.updatedMusicData({
       change: key
@@ -70,22 +66,6 @@ const Player = observer(() => {
       }
     })
   }, [musicData.id])
-
-  // 歌曲正在播放哦
-  const musicPlaying = useCallback(() => {
-    if (refChange.current) return
-    if (musicPlayer) {
-      if (musicPlayer.playing()) {
-        common.updatedMusicData({
-          duration: musicPlayer.duration(),
-          playing: musicPlayer.playing(),
-          currentTime: musicPlayer.seek()
-        })
-        requestAnimationFrame(musicPlaying)
-      }
-    }
-  }, [musicPlayer])
-
 
   // 歌曲停止事件
   // const handleStop = useCallback(() => {
@@ -162,14 +142,9 @@ const Player = observer(() => {
   }, [musicInfo, musicPlayer])
 
   useEffect(() => {
+    console.log('music-change-key')
     refChange.current = musicData.change
   }, [musicData.change])
-
-  useEffect(() => {
-    if (musicData.playing) {
-      musicPlaying()
-    }
-  }, [musicData.playing, musicPlaying])
 
   useEffect(() => {
     // 绑定enter 事件

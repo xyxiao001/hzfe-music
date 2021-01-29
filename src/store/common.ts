@@ -52,6 +52,7 @@ class Common {
       currentTime: this.musicPlayer?.seek(),
       playing: false,
     })
+    requestAnimationFrame(this.handlePlaying)
   }
 
   handleStop = () => {
@@ -60,6 +61,17 @@ class Common {
       currentTime: this.musicPlayer?.seek(),
       playing: false,
     })
+  }
+
+  handlePlaying = () => {
+    if (!this.musicData.change && this.musicPlayer && this.musicPlayer.playing()) {
+      this.updatedMusicData({
+        type: 'update',
+        duration: this.musicPlayer.duration(),
+        currentTime: this.musicPlayer.seek()
+      })
+      requestAnimationFrame(this.handlePlaying)
+    }
   }
 
   @action
@@ -94,6 +106,11 @@ class Common {
 
   @action
   updatedMusicData (data: any) {
+    if (data.type === 'update') {
+      this.musicData.duration = data.duration
+      this.musicData.currentTime = data.currentTime
+      return
+    }
     // 判断 body 样式
     if (data.hasOwnProperty('min')) {
       if (data.min) {
@@ -101,6 +118,11 @@ class Common {
       } else {
         document.body.classList.add('dialog-screen')
       }
+    }
+    if (!data.change) {
+      setTimeout(() => {
+        requestAnimationFrame(this.handlePlaying)
+      }, 100)
     }
     this.musicData = {
       ...this.musicData,

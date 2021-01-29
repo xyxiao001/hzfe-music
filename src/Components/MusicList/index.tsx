@@ -117,6 +117,7 @@ const MusicList = observer(() => {
   }
 
   useEffect(() => {
+    console.log('music-get-list')
     getList()
   }, [getList])
 
