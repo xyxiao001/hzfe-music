@@ -94,6 +94,14 @@ class Common {
 
   @action
   updatedMusicData (data: any) {
+    // 判断 body 样式
+    if (data.hasOwnProperty('min')) {
+      if (data.min) {
+        document.body.classList.remove('dialog-screen')
+      } else {
+        document.body.classList.add('dialog-screen')
+      }
+    }
     this.musicData = {
       ...this.musicData,
       ...data
