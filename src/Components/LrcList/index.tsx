@@ -1,11 +1,11 @@
 // 歌词列表展示
 import { Table } from "antd"
-import React, { useCallback, useEffect, useState } from "react"
+import { observer } from "mobx-react"
+import React, { useEffect } from "react"
 import { InterfaceLrcInfo } from "../../Interface/music"
-import { getLrcList } from "../../utils/local"
+import common from "../../store/common"
 
-
-const LrcList = () => {
+const LrcList = observer(() => {
   const columns = [
     {
       title: '歌词名',
@@ -19,31 +19,24 @@ const LrcList = () => {
       sorter: (a: InterfaceLrcInfo, b: InterfaceLrcInfo) => a.size - b.size
     }
   ]
-  
-  const [list, setList] = useState<InterfaceLrcInfo[]>([])
-
-  const [loading, setLoading] = useState(false)
-
-  const getList = useCallback(
-    async () => {
-      console.log('get lrc List')
-      setLoading(true)
-      const list = await getLrcList()
-      setList(list)
-      setLoading(false)
-    },
-    [],
-  )
+  const list = common.localMusicLrcList
+  const loading = common.localMusicLrcLoading
 
   useEffect(() => {
-    getList()
-  }, [getList])
+    console.log('获取歌词列表')
+    common.updateLocalMusicLrcList()
+  }, [])
 
   return (
     <section className="lrc-list">
-      <Table dataSource={list} columns={columns} pagination={false} rowKey="fileName" loading={loading} />
+      <Table
+        dataSource={list}
+        columns={columns}
+        pagination={false}
+        rowKey="fileName"
+        loading={loading} />
     </section>
   )
-}
+})
 
 export default LrcList

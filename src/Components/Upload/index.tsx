@@ -8,6 +8,7 @@ import { supportMusicFormat, supportMusicLrcFormat } from '../../config'
 import filesize from 'filesize'
 import { InterfaceMusicInfo } from '../../Interface/music';
 import { addLrc, addMusic } from '../../utils/local';
+import common from '../../store/common';
 
 const UploadFile = () => {
   
@@ -64,6 +65,7 @@ const UploadFile = () => {
     addMusic(data, blob).then(res => {
       console.log(res)
       message.success(`${File.name}  上传成功`)
+      common.updateLocalMusicList()
     })
   }
 

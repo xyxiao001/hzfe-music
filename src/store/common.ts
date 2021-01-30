@@ -1,6 +1,7 @@
 import { observable, action } from 'mobx';
-import { InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../Interface/music';
+import { InterfaceLrcInfo, InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../Interface/music';
 import { Howl } from 'howler'
+import { getLrcList, getMusicList } from '../utils/local';
 class Common {
   // 音乐播放实例
   @observable
@@ -18,7 +19,7 @@ class Common {
         // src: 'https://jay-music1.oss-cn-beijing.aliyuncs.com/01.%E7%88%B1%E5%9C%A8%E8%A5%BF%E5%85%83%E5%89%8D.flac?Expires=1611355123&OSSAccessKeyId=TMP.3KgLmqPNAzpF5wPEETMh2Dq86Wcz5FyeAHsHEtGksuQw9c7y5jm7LQWDLJ2Vv1cbwnpfTdrM8S4K19VLMAmCX51Cp1tbeD&Signature=zSC5jpvQqvd1BCBjjXGwUMT0g%2Bw%3D',
         // src: 'http://qna13isfq.hn-bkt.clouddn.com/07.%E7%88%B7%E7%88%B7%E6%B3%A1%E7%9A%84%E8%8C%B6.flac',
         html5: true,
-        format: [this.musicInfo.codec.toLowerCase()],
+        format: [this.musicInfo.codec.toLowerCase() || String(this.musicInfo.fileType).toLowerCase()],
         volume: 1,
         onplay: this.handlePlay,
         onpause: this.handlePause,
@@ -36,6 +37,9 @@ class Common {
       playing: true,
       change: false
     })
+    if (this.musicInfo && !this.musicInfo.duration) {
+      this.musicInfo.duration = Number(this.musicPlayer?.duration())
+    }
   }
 
   handlePause = () => {
@@ -127,6 +131,34 @@ class Common {
       ...data
     }
   }
+
+  // 本地音乐展示列表
+  @observable
+  localMusicList: InterfaceMusicInfo[] = []
+  @observable
+  localMusicLoading: boolean = false
+
+  @action
+  updateLocalMusicList = async () => {
+    this.localMusicLoading = true
+    this.localMusicList = await getMusicList()
+    this.localMusicLoading = false
+
+  }
+
+
+  // 本地歌词展示列表
+  localMusicLrcList: InterfaceLrcInfo[] = []
+  @observable
+  localMusicLrcLoading: boolean = false
+
+  @action
+  updateLocalMusicLrcList = async () => {
+    this.localMusicLrcLoading = true
+    this.localMusicLrcList = await getLrcList()
+    this.localMusicLrcLoading = false
+  }
+
 }
 
 const common = new Common()

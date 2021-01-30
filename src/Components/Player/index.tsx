@@ -25,7 +25,7 @@ const Player = observer(() => {
   const musicData = common.musicData
 
 
-  const [musicColor, setMusicColor] = useState('#52c41a')
+  const [musicColor, setMusicColor] = useState('#1890ff')
 
 
   const [currentLrc, setCurrentLrc] = useState('')
@@ -86,6 +86,7 @@ const Player = observer(() => {
   }, [musicPlayer])
 
   const getMusicInfo = useCallback(async () => {
+    if (!musicData.id) return
     const info: InterfaceMusicInfo = await getInfoFormLocal() as InterfaceMusicInfo
     if (!info) return
     common.updatedMusicInfo(info)
@@ -97,10 +98,10 @@ const Player = observer(() => {
       })
       .catch(e => {
         setMusicColor(
-          '#52c41a'
+          '#1890ff'
         )
       });
-  }, [getInfoFormLocal])
+  }, [getInfoFormLocal, musicData.id])
 
   // 绑定键盘事件
   const keyDown = useCallback((event: any) => {
@@ -112,7 +113,7 @@ const Player = observer(() => {
   }, [handelPlay])
 
   // 修改播放器状态
-  const handelChangeSize =  () => {
+  const handelChangeSize = () => {
     common.updatedMusicData({
       min: !musicData.min,
     })
@@ -159,13 +160,13 @@ const Player = observer(() => {
     <section className="player">
       {
         musicData.min ? (
-          <section className="player-min" style={{color: musicColor}}>
+          <section className="player-min" style={{ color: musicColor }}>
             {
               musicInfo ? (
                 <section className="player-layout">
                   <section className="layout-left">
                     <section className="music-img" onClick={handelChangeSize}>
-                      <img src={musicInfo.picture.length > 0 ? musicInfo.picture[0]  : process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
+                      <img src={musicInfo.picture.length > 0 ? musicInfo.picture[0] : process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
                     </section>
                     <section className="player-info">
                       <p className="music-name">{musicInfo.name}</p>
@@ -208,7 +209,7 @@ const Player = observer(() => {
 
                       <section className="player-left">
                         <section className="player-line">
-                          <img src={musicInfo.picture.length > 0 ? musicInfo.picture[0]  : process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
+                          <img src={musicInfo.picture.length > 0 ? musicInfo.picture[0] : process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
                         </section>
                         <section className="player-line">
                           <section className="player-info">

@@ -1,15 +1,16 @@
 // 歌词列表展示
 import { Space, Table } from "antd"
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { InterfaceMusicInfo } from "../../Interface/music"
 import { formatTime } from "../../utils"
-import { getMusicList } from "../../utils/local"
 import { observer } from "mobx-react"
 import { PauseCircleOutlined, PlayCircleOutlined } from "@ant-design/icons"
 import './index.scss'
 import common from "../../store/common"
 const MusicList = observer(() => {
   const musicData = common.musicData
+  const list = common.localMusicList
+  const loading = common.localMusicLoading
   const columns = [
     {
       title: '歌曲',
@@ -80,21 +81,6 @@ const MusicList = observer(() => {
       }
     },
   ]
-  
-  const [list, setList] = useState<InterfaceMusicInfo[]>([])
-
-  const [loading, setLoading] = useState(false)
-
-  const getList = useCallback(
-    async () => {
-      console.log('get music List')
-      setLoading(true)
-      const list = await getMusicList()
-      setList(list)
-      setLoading(false)
-    },
-    [],
-  )
 
   const handlePlayClick = (item: InterfaceMusicInfo) => {
     if (item.id !== musicData.id) {
@@ -117,9 +103,9 @@ const MusicList = observer(() => {
   }
 
   useEffect(() => {
-    console.log('music-get-list')
-    getList()
-  }, [getList])
+    console.log('获取音乐列表')
+    common.updateLocalMusicList()
+  }, [])
 
   return (
     <section className="lrc-list">

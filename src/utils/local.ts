@@ -91,7 +91,7 @@ export const getMusicInfoFromLocal = async (id: string): Promise<InterfaceMusicI
   })
 } 
 
-// 自动管理歌曲歌词
+// 自动关联歌曲歌词
 export const MusicRelatedLrc = (): Promise<string> => {
   return new Promise(async(resolve, reject) => {
     try {

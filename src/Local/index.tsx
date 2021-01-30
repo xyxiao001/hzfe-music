@@ -1,11 +1,12 @@
 import React, { useState } from "react"
 import Upload from "../Components/Upload"
-import { Button, Tabs } from 'antd';
+import { Button, message, Tabs } from 'antd';
 import LrcList from "../Components/LrcList";
 import { useHistory, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import MusicList from "../Components/MusicList";
 import { MusicRelatedLrc } from "../utils/local";
+import common from "../store/common";
 
 const { TabPane } = Tabs;
 
@@ -25,8 +26,11 @@ const Locale = () => {
   }
   const [key, setKey] = useState('')
 
-  const handleRelated = () => {
-    MusicRelatedLrc()
+  const handleRelated = async () => {
+    await MusicRelatedLrc()
+    message.success('关联成功')
+    common.updateLocalMusicList()
+    common.updateLocalMusicLrcList()
   }
 
   useEffect(() => {
