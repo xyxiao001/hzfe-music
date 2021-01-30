@@ -44,11 +44,10 @@
   sampleRate: string
   // 对应的歌词信息
   lrc: string
-  lrcHash: string
   // 真实歌曲
   music?: Blob
   // 歌曲流 hash 值，用于查询歌曲流
-  musicHash?: string 
+  id?: string 
 ```
 
 ### music-hash 歌曲信息列表
@@ -60,5 +59,16 @@
 ### lrc-hash 歌词信息表
 ```
  歌词文本存放， 和 music 里面的 hash 值做对应
+
+```
+
+
+###  设计思路
+```
+  如果是在线播放， 那么需要 node 层提前解析好音乐流数据返回，通过 audio 进行播放
+
+  如果是下载播放，下载文件流，然后对数据进行读取，然后处理存入本地， 播放直接读取数据开始播放。
+
+  本地上传，同下载文件流的处理一样。
 
 ```

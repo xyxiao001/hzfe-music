@@ -1,4 +1,3 @@
-import { iterate } from "localforage";
 
 // 歌曲储存信息
 export interface InterfaceMusicInfo {
@@ -24,14 +23,29 @@ export interface InterfaceMusicInfo {
   duration: number
   // 歌曲采样率
   sampleRate: string
-  // 对应的歌词信息
-  lrc?: string
-  // 对应的歌词hash 值，用作查询关联
-  lrcHash?: string
+  // 对应的歌词真正的信息
+  lrc?: string,
+  // 对应的歌词的名称
+  lrcKey?: string
   // 真实歌曲
-  music?: Blob,
+  music?: Blob
   // 歌曲流 hash 值，用于查询歌曲流
-  musicHash?: string 
+  id?: string 
+  // 文件读取的信息
+  fileName?: string
+  fileType?: string
+  fileSize?: string
+  size?: number
+}
+
+export interface InterfaceLrcInfo {
+  // 歌词详情
+  content: string
+  // 文件读取的信息
+  fileName: string
+  fileType: string
+  fileSize: string,
+  size: number
 }
 
 // 歌词信息
@@ -42,12 +56,25 @@ export interface InterfaceLrc {
   time: number
 }
 
+// 逐字歌词信息
+export interface InterfaceLrcWord {
+  // 歌词
+  text: string
+  start: number
+  end: number
+}
+
 // 歌曲播放信息状态储存
 export interface InterfaceMusicPlayingInfo {
+  id: string
   // 是否处于播放中
   playing: boolean
   // 歌曲总时间
   duration: number
   // 歌曲正在播放时间
-  currentTime: number
+  currentTime: number,
+  // 当前是否处于变动中
+  change: boolean,
+  // 当前播放器状态
+  min: boolean
 }

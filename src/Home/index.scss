@@ -2,6 +2,7 @@
   width: 100%;
   overflow: auto;
   background-color: white;
+  padding-bottom: 70px;
 
   .wrapper-box {
     display: flex;
@@ -9,19 +10,45 @@
   }
   
   .nav {
-    padding-top: 50px;
-    width: 200px;
-    flex-shrink: 0;
-
+    position: absolute;
+    top: 0;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    backdrop-filter: saturate(180%) blur(20px);
+    background-color: white;
+    
     .nav-item {
       text-align: center;
-      line-height: 35px;
+      line-height: 40px;
+      padding: 10px 0;
+      margin-right: 50px;
+      margin-bottom: 0px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all .2s ease-in-out;
+      user-select: none;
+
+      a {
+        display: inline-block;
+        color: #000;
+
+        &.active {
+          color: #52c41a;
+        }
+
+        &:hover {
+          color: #52c41a;
+        }
+      }
     }
   }
 
   .music-box {
     width: 100%;
     padding: 50px;
+    margin-top: 40px;
     background-color: rgba(247, 248, 254, 1);
   }
 }

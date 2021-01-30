@@ -58,3 +58,19 @@ a {
 del {
     text-decoration: line-through;
 }
+
+
+.action {
+  color: #1890ff;
+  cursor: pointer;
+  transition: all .2 ease;
+
+  &:hover {
+      opacity: .8;
+  }
+}
+
+.tips {
+  font-size: 12px;
+  margin-top: 10px;
+}

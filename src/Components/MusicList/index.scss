@@ -1,0 +1,25 @@
+.lrc-list {
+  .list-play {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+    height: 30px;
+    line-height: 30px;
+
+    >span {
+      display: flex;
+      align-items: center;
+    }
+
+    .icon {
+      font-size: 18px;
+      margin-right: 5px;
+      cursor: pointer;
+      transition: all .2s ease-in;
+
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+  }
+}
