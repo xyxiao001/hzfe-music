@@ -128,6 +128,7 @@ const Player = observer(() => {
   useEffect(() => {
     console.log('useEffect-create')
     if (musicInfo && !musicPlayer) {
+      setCurrentLrc('')
       console.log('创建音乐实例')
       common.createdPlayer()
     }

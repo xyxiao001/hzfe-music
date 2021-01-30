@@ -285,3 +285,9 @@ const Tween = {
     return c * (t /= d) * t * t + b;
   }
 }
+
+// 返回音乐播放格式
+export const getFormatCode = (code: string) => {
+  if (code === 'mpeg 1 layer 3') return 'mp3'
+  return code
+}
