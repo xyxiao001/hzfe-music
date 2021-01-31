@@ -7,6 +7,7 @@ import { observer } from "mobx-react"
 import { PauseCircleOutlined, PlayCircleOutlined } from "@ant-design/icons"
 import './index.scss'
 import common from "../../store/common"
+import PlayingIcon from "../Playing-icon"
 const MusicList = observer(() => {
   const musicData = common.musicData
   const list = common.localMusicList
@@ -16,9 +17,10 @@ const MusicList = observer(() => {
       title: '歌曲',
       dataIndex: 'name',
       key: 'name',
+      width: 300,
       render: (name: string, row: InterfaceMusicInfo) => 
         (
-          <p className="list-play">
+        <section className="list-play">
             {
               (musicData?.id === row.id && musicData.playing) ?
               (
@@ -32,7 +34,13 @@ const MusicList = observer(() => {
               )
             }
             <span>{ name}</span>
-          </p>
+          {
+            (musicData?.id === row.id && musicData.playing) ?
+              (
+                <PlayingIcon></PlayingIcon>
+              ) : ''
+          }
+        </section>
         )
     },
     {

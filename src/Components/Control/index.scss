@@ -1,5 +1,6 @@
 .player-control {
   width: 100%;
+  justify-content: center;
   p {
     margin: 0
   }
@@ -8,6 +9,7 @@
     width: 30vw;
     max-width: 50vh;
     height: 120px;
+    margin: auto;
     .control-line {
       display: flex;
       justify-content: space-between;
