@@ -134,19 +134,22 @@
   width: 100%;
   height: 70px;
   z-index: 100;
-  color: #820014;
+  color: var(--primary-color);
   background-color:rgb(33, 32, 32, .9);
 
   .player-layout {
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: space-between;
     height: 100%;
     padding: 0 50px;
 
     .layout-left {
       display: flex;
+      width: 20%;
       min-width: 200px;
+      flex-shrink: 0;
+      justify-content: center;
     }
 
     .music-img img {
@@ -167,6 +170,10 @@
       p {
         margin-bottom: 0;
       }
+    }
+
+    .music-progress {
+      width: 100%;
     }
   }
 }

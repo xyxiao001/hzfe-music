@@ -1,0 +1,24 @@
+.progress {
+  .ant-slider {
+    .ant-slider-track {
+      background-color: var(--primary-color);
+    }
+  
+    .ant-slider-handle {
+      border-color: var(--primary-color);
+      &:hover, &:focus {
+        border-color: var(--primary-color);
+      }
+    }
+
+    &:hover {
+      .ant-slider-track {
+        background-color: var(--primary-color);
+      }
+    
+      .ant-slider-handle, .ant-slider-handle:not(.ant-tooltip-open) {
+        border-color: var(--primary-color);
+      }
+    }
+  }
+}

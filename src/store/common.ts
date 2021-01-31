@@ -160,6 +160,15 @@ class Common {
     this.localMusicLrcLoading = false
   }
 
+  // 音乐播放时修改全局主题色
+  @observable
+  musicColor = '#1890ff'
+
+  @action
+  updateMusicColor = (color: string) => {
+    this.musicColor = color
+    document.documentElement.style.setProperty('--primary-color', color)
+  }
 }
 
 const common = new Common()

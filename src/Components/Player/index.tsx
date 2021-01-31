@@ -24,13 +24,12 @@ const Player = observer(() => {
   // 当前的状态, 用来做歌曲时间，还是当前拖动时间的判定
   const musicData = common.musicData
 
-
-  const [musicColor, setMusicColor] = useState('#1890ff')
-
-
   const [currentLrc, setCurrentLrc] = useState('')
 
   const refChange = useRef(false)
+
+  // 主题色
+  const musicColor = common.musicColor
 
   const handleChanging = (value: number) => {
     // 当前拖动时间的改变
@@ -92,12 +91,12 @@ const Player = observer(() => {
     common.updatedMusicInfo(info)
     fac.getColorAsync(info.picture[0])
       .then(color => {
-        setMusicColor(
+        common.updateMusicColor(
           setSaturation(.8, setLightness(.5, color.rgba))
         )
       })
       .catch(e => {
-        setMusicColor(
+        common.updateMusicColor(
           '#1890ff'
         )
       });
@@ -161,7 +160,7 @@ const Player = observer(() => {
     <section className="player">
       {
         musicData.min ? (
-          <section className="player-min" style={{ color: musicColor }}>
+          <section className="player-min">
             {
               musicInfo ? (
                 <section className="player-layout">
