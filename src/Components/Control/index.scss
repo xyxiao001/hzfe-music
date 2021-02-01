@@ -44,13 +44,14 @@
         justify-content: center;
         width: 40px;
         height: 40px;
-        background-color: white;
         padding: 10px;
-        border-radius: 100%;
+        cursor: pointer;
+        color: white;
+        margin: 0 20px;
       }
   
       .icon-play, .icon-pause {
-        font-size: 40px;
+        font-size: 35px;
         cursor: pointer;
         transition: all .2s ease-in-out;
       }
@@ -61,6 +62,22 @@
       width: 200px;
       justify-content: flex-end;
     }
+
+    .control-icon-list {
+      display: flex;
+      align-items: center;
+      font-size: 35px;
+      color: white;
+
+      p {
+        cursor: pointer;
+        transition: all .2s ease-in-out;
+  
+        &:hover {
+          opacity: .8;
+        }
+      }
+    }
   }
 
   .control-min {
@@ -70,22 +87,32 @@
     margin-left: 30px;
     width: 100%;
 
+    .control-icon-list {
+      display: flex;
+      align-items: center;
+      font-size: 35px;
+      color: white;
+
+      p {
+        cursor: pointer;
+        transition: all .2s ease-in-out;
+  
+        &:hover {
+          opacity: .8;
+        }
+      }
+    }
+
     .icon-play-bg {
       display: flex;
       align-items: center;
       justify-content: center;
       width: 40px;
       height: 40px;
-      background-color: white;
+      font-size: 35px;
       padding: 10px;
-      border-radius: 100%;
-    }
-
-    .icon-play, .icon-pause {
-      color: var(--text-color);
-      font-size: 40px;
       cursor: pointer;
-      transition: all .2s ease-in-out;
+      margin: 0 5px;
     }
 
     .control-progress {

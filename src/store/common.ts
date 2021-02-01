@@ -3,7 +3,16 @@ import { InterfaceLrcInfo, InterfaceMusicInfo, InterfaceMusicPlayingInfo } from 
 import { Howl } from 'howler'
 import { getLrcList, getMusicList, } from '../utils/local';
 import { getFormatCode } from '../utils';
+import { cloneDeep } from 'lodash';
 class Common {
+  @observable
+  preUrl: string = ''
+
+  @action
+  updatePreUrl (url: string) {
+    this.preUrl = url
+  }
+  
   // 音乐播放实例
   @observable
   musicPlayer: Howl | null = null
@@ -14,9 +23,14 @@ class Common {
       this.updatedMusicData({
         playing: false,
       })
+      if (this.preUrl) {
+        URL.revokeObjectURL(this.preUrl)
+      }
+      const url = URL.createObjectURL(this.musicInfo.music)
+      this.updatePreUrl(url)
       this.musicPlayer = new Howl({
         autoplay: true,
-        src: URL.createObjectURL(this.musicInfo.music),
+        src: url,
         // src: 'https://jay-music1.oss-cn-beijing.aliyuncs.com/01.%E7%88%B1%E5%9C%A8%E8%A5%BF%E5%85%83%E5%89%8D.flac?Expires=1611355123&OSSAccessKeyId=TMP.3KgLmqPNAzpF5wPEETMh2Dq86Wcz5FyeAHsHEtGksuQw9c7y5jm7LQWDLJ2Vv1cbwnpfTdrM8S4K19VLMAmCX51Cp1tbeD&Signature=zSC5jpvQqvd1BCBjjXGwUMT0g%2Bw%3D',
         // src: 'http://qna13isfq.hn-bkt.clouddn.com/07.%E7%88%B7%E7%88%B7%E6%B3%A1%E7%9A%84%E8%8C%B6.flac',
         html5: true,
@@ -58,6 +72,7 @@ class Common {
       playing: false,
     })
     requestAnimationFrame(this.handlePlaying)
+    this.handleNextMusic()
   }
 
   handleStop = () => {
@@ -133,6 +148,64 @@ class Common {
     }
   }
 
+  // 播放器状态
+  @observable
+  musicPlayerStats = {
+    // 播放器循环状态  单曲播放 single, 随机 random 顺序播放 order
+    loop: 'random'
+  }
+  
+  // 播放下一首，上一首功能实现
+  @observable
+  musicPlayList: InterfaceMusicInfo[] = []
+
+  @action
+  updateMusicPlayList = (list: InterfaceMusicInfo[]) => {
+    this.musicPlayList = list
+  }
+
+  // 歌曲播放下一首
+  handleNextMusic = () => {
+    if (this.musicPlayer) {
+      this.musicPlayer.stop()
+    }
+    let cur = 0
+    const len = this.musicPlayList.length - 1
+    while (cur < this.musicPlayList.length) {
+      if (this.musicPlayList[cur].id === this.musicData.id) {
+        break
+      }
+      cur++
+    }
+    // 防止超出下一首
+    let next = cur + 1
+    next = next > len ? (next - len) - 1 : next
+    common.updatedMusicData({
+      id: this.musicPlayList[next].id
+    })
+  }
+
+  // 歌曲播放上一首
+  handlePreMusic = () => {
+    if (this.musicPlayer) {
+      this.musicPlayer.stop()
+    }
+    let cur = 0
+    const len = this.musicPlayList.length - 1
+    while (cur < this.musicPlayList.length) {
+      if (this.musicPlayList[cur].id === this.musicData.id) {
+        break
+      }
+      cur++
+    }
+    // 防止低于 0
+    let pre = cur - 1
+    pre = pre < 0 ? len : pre
+    common.updatedMusicData({
+      id: this.musicPlayList[pre].id
+    })
+  }
+
   // 本地音乐展示列表
   @observable
   localMusicList: InterfaceMusicInfo[] = []
@@ -143,8 +216,9 @@ class Common {
   updateLocalMusicList = async () => {
     this.localMusicLoading = true
     this.localMusicList = await getMusicList()
+    // 用来做播放列表更新
+    this.updateMusicPlayList(cloneDeep(this.localMusicList))
     this.localMusicLoading = false
-
   }
 
 

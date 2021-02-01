@@ -3,6 +3,8 @@ import './index.scss'
 import { InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../../Interface/music';
 import { formatTime } from '../../utils';
 import Progress from '../Progress';
+import { PauseCircleOutlined, PlayCircleOutlined, StepBackwardOutlined, StepForwardOutlined } from '@ant-design/icons';
+import common from '../../store/common';
 const Control = (props: {
   currentInfo: InterfaceMusicInfo | null,
   currentTime: number,
@@ -29,29 +31,31 @@ const Control = (props: {
       {
         props.min ? (
           <section className="control-min">
-            <p className="icon-play-bg" onClick={
-              () => {
-                if (props.isPlaying) {
-                  props.handlePause()
-                } else {
-                  props.handlePlay()
+            <section className="control-icon-list">
+              <p onClick={common.handlePreMusic}>
+                <StepBackwardOutlined />
+              </p>
+              <p className="icon-play-bg" onClick={
+                () => {
+                  if (props.isPlaying) {
+                    props.handlePause()
+                  } else {
+                    props.handlePlay()
+                  }
                 }
-              }
-            }>
-              {
-                props.isPlaying ? (
-                  <svg className="icon icon-pause" aria-hidden="true">
-                    <use xlinkHref="#icon-Pause"></use>
-                  </svg>
-
-                ) : (
-                    <svg className="icon icon-play" aria-hidden="true">
-                      <use xlinkHref="#icon-Play"></use>
-                    </svg>
-
-                  )
-              }
-            </p>
+              }>
+                {
+                  props.isPlaying ? (
+                    <PauseCircleOutlined />
+                  ) : (
+                    <PlayCircleOutlined />
+                    )
+                }
+              </p>
+              <p onClick={common.handleNextMusic}>
+                <StepForwardOutlined />
+              </p>
+            </section>
             <section className="control-progress">
               <Progress range={Number(range.toFixed(2))} handleChanging={props.handleChanging} setChange={props.setChange}></Progress>
               {/* <span>歌曲进度百分比: { range.toFixed(2) }%</span> */}
@@ -74,6 +78,10 @@ const Control = (props: {
                   <span> {formatTime(props.currentInfo?.duration || props.musicPlayingInfo.duration || 0)} </span>
                 </section>
                 <section className="line-center">
+                <section className="control-icon-list">
+                  <p onClick={common.handlePreMusic}>
+                    <StepBackwardOutlined />
+                  </p>
                   <p className="icon-play-bg" onClick={
                     () => {
                       if (props.isPlaying) {
@@ -85,18 +93,16 @@ const Control = (props: {
                   }>
                     {
                       props.isPlaying ? (
-                        <svg className="icon icon-pause" aria-hidden="true">
-                          <use xlinkHref="#icon-Pause"></use>
-                        </svg>
-
+                        <PauseCircleOutlined />
                       ) : (
-                          <svg className="icon icon-play" aria-hidden="true">
-                            <use xlinkHref="#icon-Play"></use>
-                          </svg>
-
-                        )
+                        <PlayCircleOutlined />
+                      )
                     }
                   </p>
+                  <p onClick={common.handleNextMusic}>
+                    <StepForwardOutlined />
+                  </p>
+            </section>
                 </section>
               </section>
             </section>
