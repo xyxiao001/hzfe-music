@@ -1,9 +1,10 @@
 import { observable, action } from 'mobx';
 import { InterfaceLrcInfo, InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../Interface/music';
 import { Howl } from 'howler'
-import { getLrcList, getMusicList, } from '../utils/local';
+import { getLrcList, getMusicList, removeLrc, removeMusic, } from '../utils/local';
 import { getFormatCode } from '../utils';
 import { cloneDeep } from 'lodash';
+import { message } from 'antd';
 class Common {
   @observable
   preUrl: string = ''
@@ -221,6 +222,18 @@ class Common {
     this.localMusicLoading = false
   }
 
+  // 删除歌曲, 操作列表删除当前歌曲，同时删除歌曲文件流
+  @action deleteMusic = async (id: string) => {
+    try {
+      await removeMusic(id)
+      message.success('删除成功')
+      this.updateLocalMusicList()
+    } catch (error) {
+      console.log(error)
+      message.error('删除失败')
+    }
+  }
+
 
   // 本地歌词展示列表
   localMusicLrcList: InterfaceLrcInfo[] = []
@@ -232,6 +245,18 @@ class Common {
     this.localMusicLrcLoading = true
     this.localMusicLrcList = await getLrcList()
     this.localMusicLrcLoading = false
+  }
+
+  // 删除歌曲, 操作列表删除当前歌曲，同时删除歌曲文件流
+  @action deleteLrc = async (id: string) => {
+    try {
+      await removeLrc(id)
+      message.success('删除成功')
+      this.updateLocalMusicLrcList()
+    } catch (error) {
+      console.log(error)
+      message.error('删除失败')
+    }
   }
 
   // 音乐播放时修改全局主题色

@@ -88,7 +88,7 @@ const UploadFile = () => {
       size: File.size,
       fileSize: filesize(File.size)
     }).then(res => {
-      console.log(res)
+      common.updateLocalMusicLrcList()
       message.success(`${File.name}  上传成功`)
     })
   }

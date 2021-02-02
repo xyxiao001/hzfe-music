@@ -1,5 +1,5 @@
 // 歌词列表展示
-import { Space, Table } from "antd"
+import { Popconfirm, Space, Table } from "antd"
 import React, { useEffect } from "react"
 import { InterfaceMusicInfo } from "../../Interface/music"
 import { formatTime } from "../../utils"
@@ -18,29 +18,29 @@ const MusicList = observer(() => {
       dataIndex: 'name',
       key: 'name',
       width: 300,
-      render: (name: string, row: InterfaceMusicInfo) => 
+      render: (name: string, row: InterfaceMusicInfo) =>
         (
-        <section className="list-play">
+          <section className="list-play">
             {
               (musicData?.id === row.id && musicData.playing) ?
-              (
-                <span>
-                  <PauseCircleOutlined className="icon" onClick={() => handlePauseClick()} />
-                </span>
-              ) : (
-                <span>
-                  <PlayCircleOutlined className="icon" onClick={() => handlePlayClick(row)}/>
-                </span>
-              )
+                (
+                  <span>
+                    <PauseCircleOutlined className="icon" onClick={() => handlePauseClick()} />
+                  </span>
+                ) : (
+                  <span>
+                    <PlayCircleOutlined className="icon" onClick={() => handlePlayClick(row)} />
+                  </span>
+                )
             }
-            <span>{ name}</span>
-          {
-            (musicData?.id === row.id && musicData.playing) ?
-              (
-                <PlayingIcon></PlayingIcon>
-              ) : ''
-          }
-        </section>
+            <span>{name}</span>
+            {
+              (musicData?.id === row.id && musicData.playing) ?
+                (
+                  <PlayingIcon></PlayingIcon>
+                ) : ''
+            }
+          </section>
         )
     },
     {
@@ -64,7 +64,7 @@ const MusicList = observer(() => {
       title: '格式',
       dataIndex: 'codec',
       key: 'codec',
-      render: (codec: string, row: InterfaceMusicInfo)  => codec || row.fileType
+      render: (codec: string, row: InterfaceMusicInfo) => codec || row.fileType
     },
     {
       title: '大小',
@@ -76,7 +76,7 @@ const MusicList = observer(() => {
       title: '关联歌词名',
       dataIndex: 'lrcKey',
       key: 'lrcKey',
-      render: (lrcKey: string, row: InterfaceMusicInfo)  => {
+      render: (lrcKey: string, row: InterfaceMusicInfo) => {
         if (lrcKey) {
           return lrcKey
         } else {
@@ -86,6 +86,26 @@ const MusicList = observer(() => {
             </Space>
           )
         }
+      }
+    },
+    {
+      title: '操作',
+      dataIndex: 'name',
+      key: 'control',
+      render: (_: string, row: InterfaceMusicInfo) => {
+        return (
+          <p>
+            <Popconfirm
+              placement="topRight"
+              title={`确定删除-${row.name}-这首歌嘛`}
+              onConfirm={() => handleDelete(row.id || '')}
+              okText="确定"
+              cancelText="取消"
+            >
+              <span className="link">删除</span>
+            </Popconfirm>
+          </p>
+        )
       }
     },
   ]
@@ -103,11 +123,15 @@ const MusicList = observer(() => {
         common.musicPlayer.play()
       }
     }
-    
+
   }
 
   const handlePauseClick = () => {
     common.musicPlayer?.pause()
+  }
+
+  const handleDelete = (id: string) => {
+    common.deleteMusic(id)
   }
 
   useEffect(() => {

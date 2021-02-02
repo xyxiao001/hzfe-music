@@ -62,6 +62,23 @@ export const addMusic = async (musicInfo: InterfaceMusicInfo, blob: Blob):Promis
   return localforage.setItem('music-list', list)
 }
 
+// 通过 id 删除歌曲
+export const removeMusic = async (id: string):Promise<Boolean> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const key = 'music-list'
+      // 拉出歌曲列表
+      let list: InterfaceMusicInfo[] = await localforage.getItem(key)  || []
+      list = list.filter(item => item.id !== id)
+      await localforage.setItem('music-list', list)
+      await localforage.removeItem(id)
+      resolve(true)
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
+
 // 获取歌曲列表
 export const getMusicList = async ():Promise<InterfaceMusicInfo[]>  => {
   const key = 'music-list'
@@ -90,6 +107,22 @@ export const getMusicInfoFromLocal = async (id: string): Promise<InterfaceMusicI
     }
   })
 } 
+
+// 通过 id 删除歌词
+export const removeLrc = async (id: string):Promise<Boolean> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const key = 'music-lrc-list'
+      // 拉出歌词列表
+      let list: InterfaceMusicInfo[] = await localforage.getItem(key)  || []
+      list = list.filter(item => item.fileName !== id)
+      await localforage.setItem('music-lrc-list', list)
+      resolve(true)
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
 
 // 自动关联歌曲歌词
 export const MusicRelatedLrc = (): Promise<string> => {
