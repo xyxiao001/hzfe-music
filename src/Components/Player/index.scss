@@ -75,7 +75,10 @@
       display: block;
       margin: auto;
       width: 30vw;
+      height: 30vw;
       max-width: 50vh;
+      max-height: 50vh;
+      object-fit: cover;
       border-radius: 20px;
       align-self: baseline;
     }

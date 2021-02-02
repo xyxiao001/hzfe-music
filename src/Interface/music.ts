@@ -16,7 +16,9 @@ export interface InterfaceMusicInfo {
   // 歌曲时间
   date: string
   // 歌曲图片
-  picture: string[]
+  picture: string[],
+  // 生成可访问的 url 图片链接
+  pictureUrl?: string,
   // 编码方式
   codec: string
   // 歌曲时长

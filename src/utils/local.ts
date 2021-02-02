@@ -15,6 +15,7 @@
  */
 
 import localforage from 'localforage'
+import { dataURLtoBlob } from '.'
 import { InterfaceLrcInfo, InterfaceMusicInfo } from '../Interface/music'
 
  /**
@@ -102,6 +103,10 @@ export const getMusicInfoFromLocal = async (id: string): Promise<InterfaceMusicI
             cur.lrc = item.content
            }
          })
+      }
+      // 这里处理下图片 url 的生成
+      if (cur.picture.length > 0) {
+        cur.pictureUrl = URL.createObjectURL(dataURLtoBlob(cur.picture[0]))
       }
       resolve(cur)
     }

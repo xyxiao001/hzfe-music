@@ -13,6 +13,14 @@ class Common {
   updatePreUrl (url: string) {
     this.preUrl = url
   }
+
+  @observable
+  preImgUrl: string = ''
+
+  @action
+  updatePreImgUrl (url: string) {
+    this.preImgUrl = url
+  }
   
   // 音乐播放实例
   @observable
@@ -27,8 +35,12 @@ class Common {
       if (this.preUrl) {
         URL.revokeObjectURL(this.preUrl)
       }
+      if (this.preImgUrl) {
+        URL.revokeObjectURL(this.preImgUrl)
+      }
       const url = URL.createObjectURL(this.musicInfo.music)
       this.updatePreUrl(url)
+      this.updatePreImgUrl(this.musicInfo.pictureUrl || '')
       this.musicPlayer = new Howl({
         autoplay: true,
         src: url,
@@ -40,6 +52,45 @@ class Common {
         onend: this.handleEnd,
         onstop: this.handleStop
       })
+      const navigator: any = window.navigator
+      if (navigator.mediaSession) {
+        navigator.mediaSession.setActionHandler('play', () => {
+          this.musicPlayer?.play()
+        })
+        navigator.mediaSession.setActionHandler('pause', () => {
+          this.musicPlayer?.pause()
+        })
+        navigator.mediaSession.setActionHandler('stop', () => {
+          this.musicPlayer?.stop()
+        })
+        navigator.mediaSession.setActionHandler('seekto', (evt: any) => {
+          console.log(1, evt)
+        })
+        navigator.mediaSession.setActionHandler('seekbackward', (evt: any) => {
+          this.updatedMusicData({
+            change: true
+          })
+          const currentTime = Number(this.musicPlayer?.seek()) - 10
+          this.musicPlayer?.seek(currentTime)
+          this.updatedMusicData({
+            change: false
+          })
+          console.log('快退')
+        });
+        navigator.mediaSession.setActionHandler('seekforward', (evt: any) => {
+          this.updatedMusicData({
+            change: true
+          })
+          const currentTime = Number(this.musicPlayer?.seek()) + 10
+          this.musicPlayer?.seek(currentTime)
+          this.updatedMusicData({
+            change: false
+          })
+          console.log('快进')
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', this.handlePreMusic);
+        navigator.mediaSession.setActionHandler('nexttrack', this.handleNextMusic);
+      }
     }
   }
 
@@ -53,6 +104,20 @@ class Common {
     })
     if (this.musicInfo && !this.musicInfo.duration) {
       this.musicInfo.duration = Number(this.musicPlayer?.duration())
+    }
+    const navigator: any = window.navigator
+    const MediaMetadata = window.MediaMetadata
+    if (navigator.mediaSession && this.musicInfo){
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: this.musicInfo.name,
+        artist: this.musicInfo.artist,
+        album: this.musicInfo.album,
+        artwork: [{
+          src: this.musicInfo.pictureUrl,
+          type: 'image/jpeg',
+          sizes: '512x512'
+        }]
+      });
     }
   }
 
@@ -88,6 +153,14 @@ class Common {
         type: 'update',
         currentTime: this.musicPlayer.seek()
       })
+      const navigator: any = window.navigator
+      if (navigator.mediaSession) {
+        navigator.mediaSession.setPositionState({
+          duration: Number(this.musicPlayer.duration()),
+          playbackRate: 1,
+          position: this.musicPlayer.seek()
+        })
+      }
       requestAnimationFrame(this.handlePlaying)
     }
   }
