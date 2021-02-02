@@ -61,7 +61,7 @@ const Player = observer(() => {
       if (res) {
         resolve(res)
       } else {
-        reject('歌曲播放获取失败')
+        reject('歌曲信息获取失败')
       }
     })
   }, [musicData.id])

@@ -32,8 +32,6 @@ class Common {
       this.musicPlayer = new Howl({
         autoplay: true,
         src: url,
-        // src: 'https://jay-music1.oss-cn-beijing.aliyuncs.com/01.%E7%88%B1%E5%9C%A8%E8%A5%BF%E5%85%83%E5%89%8D.flac?Expires=1611355123&OSSAccessKeyId=TMP.3KgLmqPNAzpF5wPEETMh2Dq86Wcz5FyeAHsHEtGksuQw9c7y5jm7LQWDLJ2Vv1cbwnpfTdrM8S4K19VLMAmCX51Cp1tbeD&Signature=zSC5jpvQqvd1BCBjjXGwUMT0g%2Bw%3D',
-        // src: 'http://qna13isfq.hn-bkt.clouddn.com/07.%E7%88%B7%E7%88%B7%E6%B3%A1%E7%9A%84%E8%8C%B6.flac',
         html5: true,
         format: [getFormatCode(this.musicInfo.codec.toLowerCase() || String(this.musicInfo.fileType).toLowerCase())],
         volume: 1,
@@ -181,9 +179,13 @@ class Common {
     // 防止超出下一首
     let next = cur + 1
     next = next > len ? (next - len) - 1 : next
-    common.updatedMusicData({
-      id: this.musicPlayList[next].id
-    })
+    if (this.musicPlayList[next].id === this.musicData.id) {
+      this.musicPlayer?.play()
+    } else {
+      common.updatedMusicData({
+        id: this.musicPlayList[next].id
+      })
+    }
   }
 
   // 歌曲播放上一首
@@ -202,9 +204,13 @@ class Common {
     // 防止低于 0
     let pre = cur - 1
     pre = pre < 0 ? len : pre
-    common.updatedMusicData({
-      id: this.musicPlayList[pre].id
-    })
+    if (this.musicPlayList[pre].id === this.musicData.id) {
+      this.musicPlayer?.play()
+    } else {
+      common.updatedMusicData({
+        id: this.musicPlayList[pre].id
+      })
+    }
   }
 
   // 本地音乐展示列表
