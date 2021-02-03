@@ -15,11 +15,14 @@ class Common {
   }
 
   @observable
-  preImgUrl: string = ''
+  preImgUrl: string[] = []
 
   @action
   updatePreImgUrl (url: string) {
-    this.preImgUrl = url
+    this.preImgUrl.push(url)
+    if (this.preImgUrl.length >= 5) {
+      URL.revokeObjectURL(this.preImgUrl.shift() as string)
+    }
   }
   
   // 音乐播放实例
@@ -32,13 +35,10 @@ class Common {
       this.updatedMusicData({
         playing: false,
       })
+      const url = URL.createObjectURL(this.musicInfo.music)
       if (this.preUrl) {
         URL.revokeObjectURL(this.preUrl)
       }
-      if (this.preImgUrl) {
-        URL.revokeObjectURL(this.preImgUrl)
-      }
-      const url = URL.createObjectURL(this.musicInfo.music)
       this.updatePreUrl(url)
       this.updatePreImgUrl(this.musicInfo.pictureUrl || '')
       this.musicPlayer = new Howl({
@@ -113,7 +113,7 @@ class Common {
         artist: this.musicInfo.artist,
         album: this.musicInfo.album,
         artwork: [{
-          src: this.musicInfo.pictureUrl,
+          src: this.musicInfo.pictureUrl || '',
           type: 'image/jpeg',
           sizes: '512x512'
         }]
@@ -130,12 +130,12 @@ class Common {
   }
 
   handleEnd = () => {
-    console.log('歌曲播放完了')
     this.updatedMusicData({
       currentTime: this.musicPlayer?.seek(),
       playing: false,
     })
     requestAnimationFrame(this.handlePlaying)
+    console.log('歌曲播放完了')
     this.handleNextMusic()
   }
 
@@ -154,7 +154,7 @@ class Common {
         currentTime: this.musicPlayer.seek()
       })
       const navigator: any = window.navigator
-      if (navigator.mediaSession) {
+      if (navigator.mediaSession && this.musicPlayer) {
         navigator.mediaSession.setPositionState({
           duration: Number(this.musicPlayer.duration()),
           playbackRate: 1,
