@@ -11,6 +11,7 @@ import { getMusicInfoFromLocal } from '../../utils/local';
 import { DownOutlined } from '@ant-design/icons';
 import { observer } from "mobx-react"
 import common from '../../store/common';
+import { animated, useTransition } from 'react-spring/web';
 
 const fac = new FastAverageColor();
 
@@ -30,6 +31,12 @@ const Player = observer(() => {
 
   // 主题色
   const musicColor = common.musicColor
+
+  const playerMaxTransitions = useTransition(!musicData.min, null, {
+    from: { transform: 'translate3d(0, 100vh, 0)' },
+    enter: { transform: 'translate3d(0, 0px, 0)' },
+    leave: { transform: 'translate3d(0, 100vh, 0)' },
+  })
 
   const handleChanging = (value: number) => {
     // 当前拖动时间的改变
@@ -166,7 +173,7 @@ const Player = observer(() => {
                 <section className="player-layout">
                   <section className="layout-left">
                     <section className="music-img" onClick={handelChangeSize}>
-                      <img src={musicInfo.pictureUrl ?  musicInfo.pictureUrl : process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
+                      <img src={musicInfo.pictureUrl ? musicInfo.pictureUrl : process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
                     </section>
                     <section className="player-info">
                       <p className="music-name">{musicInfo.name}</p>
@@ -193,74 +200,77 @@ const Player = observer(() => {
                 )
             }
           </section>
-        ) : (
-            <section className="player-max">
-              <section className="status-control" onClick={handelChangeSize}>
-                <DownOutlined />
-              </section>
-              <section className="player-bg" style={{ "backgroundImage": `url(${musicInfo?.pictureUrl || process.env.PUBLIC_URL + '/images/music-no.jpeg'})` }}></section>
-              <section className="player-fade"></section>
-              {/* <Upload></Upload> */}
-              {/* 这里去渲染歌曲信息 */}
-              <section className="player-layout">
-                {
-                  musicInfo ?
-                    <section className="player-box">
+        ) : ('')
+      }
+      {
+        playerMaxTransitions.map(({ item, key, props }) =>
+          item && <animated.section className="player-max" key={key} style={props}>
+            <section className="status-control" onClick={handelChangeSize}>
+              <DownOutlined />
+            </section>
+            <section className="player-bg" style={{ "backgroundImage": `url(${musicInfo?.pictureUrl || process.env.PUBLIC_URL + '/images/music-no.jpeg'})` }}></section>
+            <section className="player-fade"></section>
+            {/* <Upload></Upload> */}
+            {/* 这里去渲染歌曲信息 */}
+            <section className="player-layout">
+              {
+                musicInfo ?
+                  <section className="player-box">
 
-                      <section className="player-left">
-                        <section className="player-line">
-                          <img src={musicInfo.pictureUrl ? musicInfo.pictureUrl : process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
-                        </section>
-                        <section className="player-line">
-                          <section className="player-info">
-                            <p className="music-name">{musicInfo.name}</p>
-                            <p className="music-artist">{musicInfo.artist} - {musicInfo.album}</p>
-                            <p className="music-current-lrc">{currentLrc}</p>
-                          </section>
-                        </section>
-                        <Control
-                          handlePlay={handelPlay}
-                          handlePause={handelPlay}
-                          currentInfo={musicInfo || null}
-                          musicPlayingInfo={musicData}
-                          currentTime={musicData.currentTime}
-                          handleChanging={handleChanging}
-                          setChange={setChangeFromControl}
-                          isPlaying={musicData.playing}></Control>
+                    <section className="player-left">
+                      <section className="player-line">
+                        <img src={musicInfo.pictureUrl ? musicInfo.pictureUrl : process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
                       </section>
-                      <section className="player-right">
-                        {
-                          musicInfo.lrc?.match(/\](\S)\[/g) ? (
-                            <LrcWord
+                      <section className="player-line">
+                        <section className="player-info">
+                          <p className="music-name">{musicInfo.name}</p>
+                          <p className="music-artist">{musicInfo.artist} - {musicInfo.album}</p>
+                          <p className="music-current-lrc">{currentLrc}</p>
+                        </section>
+                      </section>
+                      <Control
+                        handlePlay={handelPlay}
+                        handlePause={handelPlay}
+                        currentInfo={musicInfo || null}
+                        musicPlayingInfo={musicData}
+                        currentTime={musicData.currentTime}
+                        handleChanging={handleChanging}
+                        setChange={setChangeFromControl}
+                        isPlaying={musicData.playing}></Control>
+                    </section>
+                    <section className="player-right">
+                      {
+                        musicInfo.lrc?.match(/\](\S)\[/g) ? (
+                          <LrcWord
+                            setCurrentLrc={setCurrentLrc}
+                            color={musicColor}
+                            lrc={musicInfo.lrc || ''}
+                            currentInfo={musicInfo || null}
+                            currentTime={musicData.currentTime}
+                            isPlaying={musicData.playing}></LrcWord>
+                        )
+                          : (
+                            <Lrc
                               setCurrentLrc={setCurrentLrc}
                               color={musicColor}
                               lrc={musicInfo.lrc || ''}
                               currentInfo={musicInfo || null}
                               currentTime={musicData.currentTime}
-                              isPlaying={musicData.playing}></LrcWord>
+                              isPlaying={musicData.playing}></Lrc>
                           )
-                            : (
-                              <Lrc
-                                setCurrentLrc={setCurrentLrc}
-                                color={musicColor}
-                                lrc={musicInfo.lrc || ''}
-                                currentInfo={musicInfo || null}
-                                currentTime={musicData.currentTime}
-                                isPlaying={musicData.playing}></Lrc>
-                            )
-                        }
-                      </section>
-                    </section> : ''
-                }
-              </section>
-              {/* <section className="music-log">
-                <p>歌曲播放状态 {musicData.playing ? '播放中' : '没有播放'}</p>
-                  <p>歌曲总时长 {formatTime(musicData.duration)}</p>
-                  <p>歌曲当前时间 {formatTime(musicData.currentTime)}</p>
-              </section> */}
-              {/* 这里是歌曲控制台的 */}
+                      }
+                    </section>
+                  </section> : ''
+              }
             </section>
-          )
+            {/* <section className="music-log">
+          <p>歌曲播放状态 {musicData.playing ? '播放中' : '没有播放'}</p>
+            <p>歌曲总时长 {formatTime(musicData.duration)}</p>
+            <p>歌曲当前时间 {formatTime(musicData.currentTime)}</p>
+        </section> */}
+            {/* 这里是歌曲控制台的 */}
+          </animated.section>
+        )
       }
     </section>
   );
