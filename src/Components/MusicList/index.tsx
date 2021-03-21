@@ -140,7 +140,7 @@ const MusicList = observer(() => {
   }, [])
 
   return (
-    <section className="lrc-list">
+    <section className="lrc-list-table">
       <Table dataSource={list} columns={columns} pagination={false} rowKey="fileName" loading={loading} />
     </section>
   )

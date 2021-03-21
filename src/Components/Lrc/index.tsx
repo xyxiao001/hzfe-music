@@ -22,10 +22,10 @@ const Lrc = (props: {
   // 当前是否可以进行歌词的自动滚动
   const [canScroll, setCanScroll] = useState(true)
 
-  // 当前每行滚动的高度
   const [lineHeight, setLineHeight] = useState(0)
 
-  const topLine = 1
+
+  const topHeight = 80
    
   useEffect(() => {
     setLrcList(formatLrc(props.lrc))
@@ -44,7 +44,14 @@ const Lrc = (props: {
     if (lrcScroll && canScroll && props.isPlaying) {
       // 计算当前歌词应该需要滚动的场景
       const target: any = lrcScroll.current
-      const top = lineHeight * (lrcIndex - topLine) || 0
+      // 这里因为可能涉及换行，所以需要计算出每行的高度, 拿到高度
+      // const top = lineHeight * (lrcIndex - topLine) || 0
+      let top = -topHeight
+      document.querySelectorAll('.lrc-list p').forEach((item: any, index) => {
+        if (index < lrcIndex) {
+          top += item.offsetHeight + lineHeight
+        }
+      })
       if (target) {
         target.scrollTo({
           top,
@@ -73,8 +80,8 @@ const Lrc = (props: {
   }
   
   const resize = () => {
-    // 浏览器高除以 高度 + 
-    setLineHeight(document.body.offsetHeight * (5 + 2.5) / 100)
+    // 浏览器高除以高度,计算出每行的高度
+    setLineHeight(document.body.offsetHeight * 2.5 / 100)
   }
 
   useEffect(() => {
@@ -97,7 +104,12 @@ const Lrc = (props: {
           return
         }
         const target: any = lrcScroll.current
-        const top = lineHeight * (lrcIndex - topLine) || 0
+        let top = -topHeight
+        document.querySelectorAll('.lrc-list p').forEach((item: any, index) => {
+          if (index < lrcIndex) {
+            top += item.offsetHeight + lineHeight
+          }
+        })
         if (target) {
           target.scrollTo({
             top,
@@ -116,8 +128,10 @@ const Lrc = (props: {
                 color: lrcIndex === index ? props.color : ''
               }}
               className={getLrcChooseName(index)}
+              dangerouslySetInnerHTML={{
+                __html: lrcItem.text
+              }}
             >
-              { lrcItem.text}
             </p>
           ))
         }

@@ -225,7 +225,12 @@ const Player = observer(() => {
                         <section className="player-info">
                           <p className="music-name">{musicInfo.name}</p>
                           <p className="music-artist">{musicInfo.artist} - {musicInfo.album}</p>
-                          <p className="music-current-lrc">{currentLrc}</p>
+                          <p
+                            className="music-current-lrc"
+                            dangerouslySetInnerHTML={{
+                              __html: currentLrc
+                            }}
+                          ></p>
                         </section>
                       </section>
                       <Control
