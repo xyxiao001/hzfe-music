@@ -11,19 +11,19 @@ const Home = () => {
       <section className="wrapper-box">
         <section className="nav">
           <p className="nav-item">
-            <NavLink to="/" exact>推荐</NavLink>
+            <NavLink to="/">本地音乐</NavLink>
           </p>
           <p className="nav-item">
-            <NavLink to="/local">本地音乐</NavLink>
+            <NavLink to="/like" exact>在线音乐</NavLink>
           </p>
         </section>
         <section className="music-box">
           <Switch>
-            <Route path="/local" exact>
-              <Locale />
+            <Route path="/like" exact>
+              <Love />
             </Route>
             <Route path="/" exact>
-              <Love />
+              <Locale />
             </Route>
           </Switch>
         </section>

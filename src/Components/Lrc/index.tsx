@@ -67,15 +67,6 @@ const Lrc = (props: {
     if(lrcIndex === index) {
       return 'choose-lrc'
     }
-    // // 下面 10 条
-    // if (lrcIndex < index && (index - lrcIndex) < 10) {
-    //   return `choose-next-${index - lrcIndex}`
-
-    // }
-    // // 上面 5 条
-    // if (lrcIndex > index && (lrcIndex - index) < 5) {
-    //   return `choose-pre-${lrcIndex - index}`
-    // }
     return ''
   }
   
@@ -123,7 +114,7 @@ const Lrc = (props: {
         {
           lrcList.map((lrcItem: InterfaceLrc, index) => (
             <p 
-              key={ `${lrcItem.time}${lrcIndex}${lrcItem.text}`}
+              key={ `${lrcItem.time}${lrcItem.text}`}
               style={{
                 color: lrcIndex === index ? props.color : ''
               }}
