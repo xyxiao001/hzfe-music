@@ -268,12 +268,6 @@ const Player = observer(() => {
                   </section> : ''
               }
             </section>
-            {/* <section className="music-log">
-          <p>歌曲播放状态 {musicData.playing ? '播放中' : '没有播放'}</p>
-            <p>歌曲总时长 {formatTime(musicData.duration)}</p>
-            <p>歌曲当前时间 {formatTime(musicData.currentTime)}</p>
-        </section> */}
-            {/* 这里是歌曲控制台的 */}
           </animated.section>
         )
       }

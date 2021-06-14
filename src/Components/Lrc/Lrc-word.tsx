@@ -54,7 +54,7 @@ const LrcWord = (props: {
         backgroundImage: `-webkit-linear-gradient(left,${props.color} ${key}%,#ffffff ${key}%)`
       }
     )
-  }, [lrcIndex, lrcList, props, props.currentTime])
+  }, [lrcIndex, lrcList, props])
 
   useEffect(() => {
     if (lrcScroll && canScroll && props.isPlaying) {

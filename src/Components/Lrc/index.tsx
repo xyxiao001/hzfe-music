@@ -38,7 +38,7 @@ const Lrc = (props: {
     if (lrcList.length && lrcList[lrcIndex]) {
       props.setCurrentLrc(lrcList[lrcIndex].text)
     }
-  }, [lrcIndex, lrcList, props, props.currentTime])
+  }, [lrcIndex, lrcList, props])
 
   useEffect(() => {
     if (lrcScroll && canScroll && props.isPlaying) {
