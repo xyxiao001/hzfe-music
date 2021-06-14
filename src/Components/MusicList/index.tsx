@@ -123,7 +123,6 @@ const MusicList = observer(() => {
         common.musicPlayer.play()
       }
     }
-
   }
 
   const handlePauseClick = () => {

@@ -291,6 +291,20 @@ class Common {
   localMusicList: InterfaceMusicInfo[] = []
   @observable
   localMusicLoading: boolean = false
+  @observable
+  localAlbumMap: Map<string, InterfaceMusicInfo[]> = new Map()
+
+  // 专辑生成说明，歌曲列表根据专辑的名称集合数组
+  @action
+  updateLocalAlbumList = () => {
+    const map = new Map()
+    this.localMusicList.forEach(item => {
+      if (item.album === '') return
+      const target = map.get(item.album) ?? []
+      map.set(item.album, [...target, item])
+    })
+    this.localAlbumMap = map
+  }
 
   @action
   updateLocalMusicList = async () => {
@@ -298,6 +312,7 @@ class Common {
     this.localMusicList = await getMusicList()
     // 用来做播放列表更新
     this.updateMusicPlayList(cloneDeep(this.localMusicList))
+    this.updateLocalAlbumList()
     this.localMusicLoading = false
   }
 

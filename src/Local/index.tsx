@@ -8,6 +8,7 @@ import MusicList from "../Components/MusicList";
 import { MusicRelatedLrc } from "../utils/local";
 import common from "../store/common";
 import localforage from 'localforage'
+import AlbumList from "../Components/AlbumList";
 
 const { TabPane } = Tabs;
 
@@ -35,13 +36,13 @@ const Locale = () => {
   }
 
   useEffect(() => {
-    const list = ['music', 'lrc']
+    const list = ['music', 'lrc', 'album']
     if (query) {
       const key = query.get('type') || ''
       if (list.includes(key)) {
         setKey(key)
       } else {
-        setKey('music')
+        setKey('album')
       }
     }
   }, [query])
@@ -72,6 +73,9 @@ const Locale = () => {
       </section>
       <section className="local-content">
         <Tabs activeKey={key} onChange={tabCallback}>
+        <TabPane tab="专辑列表" key="album">
+            <AlbumList />
+          </TabPane>
           <TabPane tab="音乐列表" key="music">
             <MusicList />
           </TabPane>
