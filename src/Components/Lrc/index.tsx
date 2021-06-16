@@ -22,7 +22,7 @@ const Lrc = (props: {
   // 当前是否可以进行歌词的自动滚动
   const [canScroll, setCanScroll] = useState(true)
 
-  const [lineHeight, setLineHeight] = useState(0)
+  const [lineHeight, setLineHeight] = useState(document.body.offsetHeight * 2.5 / 100)
 
 
   const topHeight = 80
