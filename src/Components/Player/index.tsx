@@ -111,9 +111,9 @@ const Player = observer(() => {
 
   // 绑定键盘事件
   const keyDown = useCallback((event: any) => {
-    event.preventDefault()
     const keyCode = event.keyCode as number
     if (keyCode === 32) {
+      event.preventDefault()
       handelPlay()
     }
   }, [handelPlay])
