@@ -8,6 +8,7 @@
 
 .album-item {
   position: relative;
+  min-width: 400px;
   padding: 20px;
   height: auto;
   border-radius: 40px;
@@ -35,18 +36,30 @@
   }
 
   .album-title {
-    font-size: 24px;
-    line-height: 30px;
-    margin-bottom: 20px;
+    font-size: 1vw;
+    line-height: 1.5;
+    margin-bottom: 10px;
   }
 
   .music-item {
-    font-size: 16px;
-    line-height: 30px;
+    font-size: .6vw;
+    line-height: 2.1;
     cursor: pointer;
 
     &:hover, &.active {
       color: var(--primary-color);
     }
+  }
+}
+
+@media screen and (max-width: 1700px) {
+  .album-list {
+    grid-template-columns: repeat(auto-fill, 32%);
+  }
+}
+
+@media screen and (max-width: 1400px) {
+  .album-list {
+    grid-template-columns: repeat(auto-fill, 48%);
   }
 }
