@@ -4,6 +4,7 @@
   grid-template-columns: repeat(auto-fill, 23%);
   row-gap: 90px;
   margin-top: 60px;
+  padding: 20px 40px 40px 40px;
 }
 
 .album-item {
@@ -52,7 +53,7 @@
   }
 }
 
-@media screen and (max-width: 1700px) {
+@media screen and (max-width: 1800px) {
   .album-list {
     grid-template-columns: repeat(auto-fill, 32%);
   }
