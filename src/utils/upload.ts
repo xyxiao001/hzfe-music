@@ -21,13 +21,11 @@ export const uploadRun = async (File: File) => {
   const FileName = File.name.replace(`.${FileType}`, '')
   // 这里处理我们文件的存储
   if (supportMusicFormat.includes(FileType)) {
-    console.log('当前是音频文件处理', FileName, FileType)
     await handleMusicData(File)
     return false
   }
 
   if (supportMusicLrcFormat.includes(FileType)) {
-    console.log('当前是歌词文件处理', FileName, FileType)
     await handleMusicLrc(File)
     return false
   }
