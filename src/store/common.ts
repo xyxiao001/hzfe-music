@@ -64,7 +64,9 @@ class Common {
           this.musicPlayer?.stop()
         })
         navigator.mediaSession.setActionHandler('seekto', (evt: any) => {
-          console.log(1, evt)
+          // console.log(1, evt)
+          const currentTime = Number(evt.seekTime)
+          this.musicPlayer?.seek(currentTime)
         })
         navigator.mediaSession.setActionHandler('seekbackward', (evt: any) => {
           this.updatedMusicData({
@@ -160,6 +162,11 @@ class Common {
           playbackRate: 1,
           position: this.musicPlayer.seek()
         })
+        // console.log({
+        //   duration: Number(this.musicPlayer.duration()),
+        //   playbackRate: 1,
+        //   position: this.musicPlayer.seek()
+        // })
       }
       requestAnimationFrame(this.handlePlaying)
     }
