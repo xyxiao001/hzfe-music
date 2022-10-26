@@ -7,6 +7,14 @@
     height: 30px;
     line-height: 30px;
 
+    .song-name {
+      display: inline-block;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     >span {
       display: flex;
       align-items: center;

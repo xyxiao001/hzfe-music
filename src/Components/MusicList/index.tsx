@@ -33,7 +33,7 @@ const MusicList = observer(() => {
                   </span>
                 )
             }
-            <span>{name}</span>
+            <span className="song-name">{name}</span>
             {
               (musicData?.id === row.id && musicData.playing) ?
                 (

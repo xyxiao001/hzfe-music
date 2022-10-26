@@ -163,7 +163,7 @@ class Common {
           position: this.musicPlayer.seek()
         })
         // console.log({
-        //   duration: Number(this.musicPlayer.duration()),
+        //   duration: Numbzer(this.musicPlayer.duration()),
         //   playbackRate: 1,
         //   position: this.musicPlayer.seek()
         // })
