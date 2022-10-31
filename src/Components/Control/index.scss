@@ -37,6 +37,10 @@
       .icon {
         color: var(--text-color);
       }
+
+      svg.icon {
+        color: white;
+      }
   
       .icon-play-bg {
         display: flex;
@@ -125,5 +129,19 @@
       width: 150px;
       flex-shrink: 0;
     }
+  }
+}
+
+.playing-type {
+  cursor: pointer;
+  opacity: .8;
+  transition: all .2s ease-in-out;
+  &:hover {
+    opacity: 1;
+  }
+
+  svg {
+    width: 24px;
+    margin-left: 10px;
   }
 }

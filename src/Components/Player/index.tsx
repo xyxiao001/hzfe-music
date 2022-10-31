@@ -119,21 +119,17 @@ const Player = observer(() => {
   }
 
   useEffect(() => {
-    console.log('useEffect-getMusicInfo')
     getMusicInfo()
   }, [getMusicInfo])
 
 
   useEffect(() => {
-    console.log('useEffect-create')
     if (musicInfo && !musicPlayer) {
       setCurrentLrc('')
-      console.log('创建音乐实例')
       common.createdPlayer()
     }
     return () => {
       if (musicPlayer) {
-        console.log('created destroy')
         common.updatedMusicData({
           playing: false
         })
@@ -143,7 +139,6 @@ const Player = observer(() => {
   }, [musicInfo, musicPlayer])
 
   useEffect(() => {
-    console.log('music-change-key')
     refChange.current = musicData.change
   }, [musicData.change])
 

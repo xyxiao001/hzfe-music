@@ -1,11 +1,24 @@
 import { observable, action } from 'mobx';
 import { InterfaceLrcInfo, InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../Interface/music';
 import { Howl } from 'howler'
-import { getLrcList, getMusicList, removeLrc, removeMusic, } from '../utils/local';
+import { getLrcList, getMusicList, removeLrc, removeMusic, setLastPlayType, } from '../utils/local';
 import { getFormatCode } from '../utils';
 import { cloneDeep } from 'lodash';
-import { message } from 'antd';
+import { message } from 'antd'
+import { EnumPlayingType } from '../utils/enmus';
 class Common {
+  @observable
+  playingType: `${EnumPlayingType}` = EnumPlayingType.loop
+
+  @action
+  updatePlayingType (type: `${EnumPlayingType}`) {
+    // 切换当前播放状态 顺序播放 -> 单曲循环 -> 随机播放 -> 顺序播放
+    const nextType = type === EnumPlayingType.loop ? EnumPlayingType.single : type === EnumPlayingType.single ? EnumPlayingType.random : EnumPlayingType.loop
+    setLastPlayType(nextType)
+    this.playingType = nextType
+  }
+
+
   @observable
   preUrl: string = ''
 
@@ -31,7 +44,7 @@ class Common {
 
   @action
   createdPlayer () {
-    if (this.musicInfo) {
+    if (this.musicInfo && this.musicInfo.music) {
       this.updatedMusicData({
         playing: false,
       })
@@ -64,7 +77,6 @@ class Common {
           this.musicPlayer?.stop()
         })
         navigator.mediaSession.setActionHandler('seekto', (evt: any) => {
-          // console.log(1, evt)
           const currentTime = Number(evt.seekTime)
           this.musicPlayer?.seek(currentTime)
         })
@@ -77,7 +89,6 @@ class Common {
           this.updatedMusicData({
             change: false
           })
-          console.log('快退')
         });
         navigator.mediaSession.setActionHandler('seekforward', (evt: any) => {
           this.updatedMusicData({
@@ -88,7 +99,6 @@ class Common {
           this.updatedMusicData({
             change: false
           })
-          console.log('快进')
         });
         navigator.mediaSession.setActionHandler('previoustrack', this.handlePreMusic);
         navigator.mediaSession.setActionHandler('nexttrack', this.handleNextMusic);
@@ -97,7 +107,7 @@ class Common {
   }
 
   handlePlay = () => {
-    console.log('歌曲播放了')
+    console.log('歌曲播放了', this.musicInfo?.name);
     this.updatedMusicData({
       currentTime: this.musicPlayer?.seek(),
       duration: this.musicPlayer?.duration(),
@@ -138,7 +148,7 @@ class Common {
     })
     requestAnimationFrame(this.handlePlaying)
     console.log('歌曲播放完了')
-    this.handleNextMusic()
+    this.handleNextMusic(false)
   }
 
   handleStop = () => {
@@ -150,7 +160,7 @@ class Common {
   }
 
   handlePlaying = () => {
-    if (!this.musicData.change && this.musicPlayer && this.musicPlayer.playing()) {
+    if (!this.musicData.change && this.musicPlayer?.playing()) {
       this.updatedMusicData({
         type: 'update',
         currentTime: this.musicPlayer.seek()
@@ -162,11 +172,6 @@ class Common {
           playbackRate: 1,
           position: this.musicPlayer.seek()
         })
-        // console.log({
-        //   duration: Numbzer(this.musicPlayer.duration()),
-        //   playbackRate: 1,
-        //   position: this.musicPlayer.seek()
-        // })
       }
       requestAnimationFrame(this.handlePlaying)
     }
@@ -218,7 +223,8 @@ class Common {
     }
     if (!data.change) {
       setTimeout(() => {
-        requestAnimationFrame(this.handlePlaying)
+        // requestAnimationFrame(this.handlePlaying)
+        this.handlePlaying()
       }, 100)
     }
     this.musicData = {
@@ -243,10 +249,23 @@ class Common {
     this.musicPlayList = list
   }
 
-  // 歌曲播放下一首
-  handleNextMusic = () => {
+  // 歌曲播放下一首, 如果是手动切换的，那么还是需要切换到下一首
+  handleNextMusic = (isControl = true) => {
     if (this.musicPlayer) {
       this.musicPlayer.stop()
+    }
+    // 如果是单曲循环
+    if (this.playingType === EnumPlayingType.single && !isControl) {
+      this.musicPlayer?.play()
+      return
+    }
+    // 随机播放
+    if (this.playingType === EnumPlayingType.random && this.musicPlayList.length > 2) {
+      const randomIndex = Math.floor(Math.random() * this.musicPlayList.length)
+      common.updatedMusicData({
+        id: this.musicPlayList[randomIndex].id,
+      })
+      return
     }
     let cur = 0
     const len = this.musicPlayList.length - 1
@@ -269,9 +288,23 @@ class Common {
   }
 
   // 歌曲播放上一首
-  handlePreMusic = () => {
+  handlePreMusic = (isControl = true) => {
     if (this.musicPlayer) {
       this.musicPlayer.stop()
+    }
+    // 如果是单曲循环
+    if (this.playingType === EnumPlayingType.single && !isControl) {
+      this.musicPlayer?.play()
+      return
+    }
+    // 随机播放
+    if (this.playingType === EnumPlayingType.random && this.musicPlayList.length > 2) {
+      const randomIndex = Math.floor(Math.random() * this.musicPlayList.length)
+      common.updatedMusicData({
+        id: this.musicPlayList[randomIndex].id,
+      })
+      this.musicPlayer?.play()
+      return
     }
     let cur = 0
     const len = this.musicPlayList.length - 1

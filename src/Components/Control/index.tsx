@@ -5,6 +5,8 @@ import { formatTime } from '../../utils';
 import Progress from '../Progress';
 import { PauseCircleOutlined, PlayCircleOutlined, StepBackwardOutlined, StepForwardOutlined } from '@ant-design/icons';
 import common from '../../store/common';
+import PlayingType from './playingType';
+
 const Control = (props: {
   currentInfo: InterfaceMusicInfo | null,
   currentTime: number,
@@ -32,7 +34,7 @@ const Control = (props: {
         props.min ? (
           <section className="control-min">
             <section className="control-icon-list">
-              <p onClick={common.handlePreMusic}>
+              <p onClick={() => common.handlePreMusic()}>
                 <StepBackwardOutlined />
               </p>
               <p className="icon-play-bg" onClick={
@@ -52,13 +54,13 @@ const Control = (props: {
                     )
                 }
               </p>
-              <p onClick={common.handleNextMusic}>
+              <p onClick={() => common.handleNextMusic()}>
                 <StepForwardOutlined />
               </p>
+              <PlayingType></PlayingType>
             </section>
             <section className="control-progress">
               <Progress range={Number(range.toFixed(2))} handleChanging={props.handleChanging} setChange={props.setChange}></Progress>
-              {/* <span>歌曲进度百分比: { range.toFixed(2) }%</span> */}
             </section>
             <section className="line-left">
               <span> {formatTime(props.currentTime || 0)} </span>
@@ -70,7 +72,6 @@ const Control = (props: {
             <section className="control">
               <section className="control-progress">
                 <Progress range={Number(range.toFixed(2))} handleChanging={props.handleChanging} setChange={props.setChange}></Progress>
-                {/* <span>歌曲进度百分比: { range.toFixed(2) }%</span> */}
               </section>
               <section className="control-line">
                 <section className="line-left">
@@ -79,7 +80,7 @@ const Control = (props: {
                 </section>
                 <section className="line-center">
                 <section className="control-icon-list">
-                  <p onClick={common.handlePreMusic}>
+                  <p onClick={() => common.handlePreMusic()}>
                     <StepBackwardOutlined />
                   </p>
                   <p className="icon-play-bg" onClick={
@@ -99,9 +100,10 @@ const Control = (props: {
                       )
                     }
                   </p>
-                  <p onClick={common.handleNextMusic}>
+                  <p onClick={() => common.handleNextMusic()}>
                     <StepForwardOutlined />
                   </p>
+                  <PlayingType></PlayingType>
             </section>
                 </section>
               </section>

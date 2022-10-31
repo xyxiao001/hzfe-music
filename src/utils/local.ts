@@ -17,6 +17,7 @@
 import localforage from 'localforage'
 import { dataURLtoBlob } from '.'
 import { InterfaceLrcInfo, InterfaceMusicInfo } from '../Interface/music'
+import { EnumPlayingType } from './enmus'
 
  /**
   * 添加歌词的存储方法
@@ -49,7 +50,7 @@ export const getLrcList = async ():Promise<InterfaceLrcInfo[]>  => {
 
 export const addMusic = async (musicInfo: InterfaceMusicInfo, blob: Blob):Promise<any> => {
   const key = 'music-list'
-  // 歌词，直接拉出列表，然后塞进去，储存
+  // 歌曲，直接拉出列表，然后塞进去，储存
   const list: InterfaceMusicInfo[] = await localforage.getItem(key)  || []
   // 这里需要判断下是否已经存在
   let noExist = list.every(item => item.fileName !== musicInfo.fileName)
@@ -150,4 +151,18 @@ export const MusicRelatedLrc = (): Promise<string> => {
       reject(error)
     }
   })
+}
+
+// 获取上次播放类型
+export const getLastPlayType = async (): Promise<`${EnumPlayingType}`> => {
+  const key = 'last-play-type'
+  const type = await localforage.getItem(key) as `${EnumPlayingType}`
+  return type
+}
+
+// 设置上次播放类型
+export const setLastPlayType = async (type: `${EnumPlayingType}`): Promise<`${EnumPlayingType}`> => {
+  const key = 'last-play-type'
+  await localforage.setItem(key, type)
+  return type
 }
