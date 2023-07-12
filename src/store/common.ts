@@ -303,7 +303,6 @@ class Common {
       common.updatedMusicData({
         id: this.musicPlayList[randomIndex].id,
       })
-      this.musicPlayer?.play()
       return
     }
     let cur = 0
