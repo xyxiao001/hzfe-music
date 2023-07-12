@@ -39,9 +39,9 @@
     "worker-loader": "^3.0.2"
   },
   "scripts": {
-    "start": "react-app-rewired start",
-    "dev": "react-app-rewired start",
-    "build": "react-app-rewired build --max-old-space-size=8192",
+    "start": "react-app-rewired --openssl-legacy-provider start",
+    "dev": "npm run start",
+    "build": "react-app-rewired --openssl-legacy-provider build --max-old-space-size=8192",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject"
   },

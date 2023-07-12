@@ -156,7 +156,7 @@ export const MusicRelatedLrc = (): Promise<string> => {
 // 获取上次播放类型
 export const getLastPlayType = async (): Promise<`${EnumPlayingType}`> => {
   const key = 'last-play-type'
-  const type = await localforage.getItem(key) as `${EnumPlayingType}`
+  const type = await localforage.getItem(key) as `${EnumPlayingType}` ?? EnumPlayingType.random
   return type
 }
 
