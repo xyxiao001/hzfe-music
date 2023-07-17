@@ -17,7 +17,7 @@ export const handleUpload = (File: File):boolean => {
 
 export const uploadRun = async (File: File) => {
   const nameList = File.name.split('.')
-  const FileType = nameList[nameList.length - 1]
+  const FileType = nameList[nameList.length - 1].toLowerCase();
   const FileName = File.name.replace(`.${FileType}`, '')
   // 这里处理我们文件的存储
   if (supportMusicFormat.includes(FileType)) {

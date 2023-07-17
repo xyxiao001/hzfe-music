@@ -171,13 +171,18 @@ export const formatLrcProgress = (lrc: string): InterfaceLrcWord[][] => {
 
 // 转换时间 [00:42.27] -> 11ms
 export const transformArrayToTime = (str: string): number => {
+  // 这里其实要处理下，看看是后面的毫秒是 2 位，还是3 位
+  let len = 3;
   let time = 0
-  const timeArr: number[] = /\[(\d{2}):(\d{2})(\.(\d{2,3}))?]/.exec(str)?.map(item => {
+  const timeArr: number[] = /\[(\d{2}):(\d{2})(\.(\d{2,3}))?]/.exec(str)?.map((item, index) => {
+    if (index === 4) {
+      len = item?.length ?? len;
+    }
     return item ? Number(item) : 0
   }) || []
   const min2sec = timeArr[1] * 60;
   const sec2sec = timeArr[2];
-  const msec2sec = timeArr[4] ? timeArr[4] / ((timeArr[4] + '').length === 2 ? 100 : 1000) : 0;
+  const msec2sec = timeArr[4] ? timeArr[4] / (len === 2 ? 100 : 1000) : 0;
   time = min2sec + sec2sec + msec2sec;
   return time
 }
@@ -224,6 +229,7 @@ export const getWordLineProgress = (lrcItem: InterfaceLrcWord[], time: number): 
   }
   const len = cur.end - cur.start
   progress += (time - cur.start) / len * (100 / lrcItem.length)
+  // console.log('当前行进度条', progress, time, lrcItem);
   return progress
 }
 
