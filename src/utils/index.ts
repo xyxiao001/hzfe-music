@@ -210,26 +210,22 @@ export const getWordLineProgress = (lrcItem: InterfaceLrcWord[], time: number): 
   let wordIndex = 0
   // 如果比当前字小，那么聚焦上一个字
   while (wordIndex < lrcItem.length) {
-    if (lrcItem[wordIndex].start > time) {
+    if (time < lrcItem[wordIndex].start) {
       break
     }
     wordIndex++
   }
-  if (wordIndex <= 0) return 0
-  if (wordIndex >= lrcItem.length) return 100
   // 知道哪个字后, 看看一共多少字，然后分百分比，这里从 0 开始，实际少了一个字
-  progress = wordIndex * (100 / lrcItem.length)
+  wordIndex = wordIndex - 1
   // 如果当前时间比字结束时间大，那么是 100%
-  const cur = lrcItem[wordIndex - 1]
+  const cur = lrcItem[wordIndex]
+  if (!cur) return 0
   if (time >= cur.end) {
     return 100
   }
-  if (time <= cur.start) {
-    return (wordIndex - 1) * (100 / lrcItem.length)
-  }
-  const len = cur.end - cur.start
-  progress += (time - cur.start) / len * (100 / lrcItem.length)
-  // console.log('当前行进度条', progress, time, lrcItem);
+  progress = (wordIndex / lrcItem.length) * 100
+  progress += (((time) - lrcItem[wordIndex].start) / (lrcItem[wordIndex].end - lrcItem[wordIndex].start) * (1 / lrcItem.length)) * 100
+  // console.log('当前行进度条', progress, time, wordIndex, lrcItem);
   return progress
 }
 
