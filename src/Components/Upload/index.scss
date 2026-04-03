@@ -1,16 +1,30 @@
 .page-upload {
   .upload-line {
-    width: 300px;
+    width: 100%;
+  }
+
+  .ant-upload,
+  .ant-upload-wrapper {
+    width: 100%;
+  }
+
+  .ant-btn {
+    width: 100%;
+    height: 48px;
+    border-radius: 16px;
+    font-weight: 600;
   }
 
   .tips {
     font-size: 12px;
     padding-top: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 0;
+    color: rgba(31, 31, 41, 0.52);
+    line-height: 1.8;
     span {
       display: inline-block;
       width: 100%;
-      line-height: 25px;
+      line-height: 22px;
     }
   }
 }

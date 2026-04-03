@@ -1,0 +1,58 @@
+.lrc-binding-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.binding-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(31, 31, 41, 0.04);
+}
+
+.binding-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.binding-meta {
+  color: rgba(31, 31, 41, 0.56);
+  font-size: 13px;
+}
+
+.binding-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.binding-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.binding-empty {
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(31, 31, 41, 0.04);
+
+  p {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  span {
+    color: rgba(31, 31, 41, 0.56);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+}

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   HashRouter as Router,
-  Switch,
+  Routes,
   Route
 } from "react-router-dom";
 import Home from './Home';
@@ -32,14 +32,9 @@ function App() {
   return (
     <section className="hzfe-music">
       <Router>
-        <Switch>
-          <Route path="/" exact>
-            <Home />
-          </Route>
-          <Route path="*" exact>
-            <Home />
-          </Route>
-        </Switch>
+        <Routes>
+          <Route path="/*" element={<Home />} />
+        </Routes>
       </Router>
     </section>
   );

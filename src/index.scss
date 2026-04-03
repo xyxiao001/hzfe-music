@@ -19,7 +19,9 @@ time, mark, audio, video {
     background:transparent;
 }
 body {
-    line-height:1;
+    line-height:1.5;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: #1f1f29;
 }
 
 :focus {
@@ -61,7 +63,7 @@ del {
 
 
 .action {
-  color: #1890ff;
+  color: var(--primary-color);
   cursor: pointer;
   transition: all .2 ease;
 
@@ -115,4 +117,33 @@ del {
 .dialog-screen {
   height: 100%;
   overflow: hidden;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.lrc-list {
+  .ant-table {
+    background: transparent;
+  }
+
+  .ant-table-thead > tr > th {
+    background: transparent;
+    color: rgba(31, 31, 41, 0.48);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom-color: rgba(31, 31, 41, 0.06);
+  }
+
+  .ant-table-tbody > tr > td {
+    background: transparent;
+    border-bottom-color: rgba(31, 31, 41, 0.05);
+  }
+
+  .ant-table-tbody > tr:hover > td {
+    background: rgba(255, 255, 255, 0.66);
+  }
 }

@@ -1,16 +1,17 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { uploadRun } from '../utils/upload'
 
 class Upload {
+  constructor() {
+    makeAutoObservable(this, {}, { autoBind: true })
+  }
+
   // 当前是否处于数据库写入的状态中, 同一时刻，只能进行一个读写操作
   // 文件上传的处理
-  @observable
   isUploading: boolean = false
 
-  @observable
   uploadList: File[] = []
 
-  @action
   addUploadTask = (File: File) => {
     this.uploadList.push(File)
     this.checkUpload()
@@ -42,4 +43,3 @@ const upload = new Upload()
 
  
 export default upload
-

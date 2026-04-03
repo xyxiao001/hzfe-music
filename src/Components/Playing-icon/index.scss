@@ -10,6 +10,18 @@
   margin: 0 20px;
 }
 
+.playing-icon.compact {
+  width: 24px;
+  height: 16px;
+  margin: 0 8px 0 0;
+
+  > span {
+    width: 3px;
+    box-shadow: none;
+    opacity: 0.72;
+  }
+}
+
 .playing-icon > span {
 	display: inline-block;
   width: 6px;

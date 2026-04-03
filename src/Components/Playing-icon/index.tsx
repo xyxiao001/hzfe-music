@@ -1,9 +1,11 @@
 import React from "react"
 import './index.scss'
 
-const PlayingIcon = () => {
+const PlayingIcon = (props: {
+  className?: string
+}) => {
   return (
-    <p className="playing-icon">
+    <p className={`playing-icon ${props.className || ''}`.trim()}>
       <span className="rect1"></span>
       <span className="rect2"></span>
       <span className="rect3"></span>

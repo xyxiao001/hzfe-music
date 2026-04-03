@@ -20,7 +20,7 @@ const UploadFile = () => {
     <section className="page-upload">
       <section className="upload-line">
         <Upload beforeUpload={handleUpload} showUploadList={false} accept={acceptStr()} multiple>
-          <Button icon={<UploadOutlined />}>点击上传本地歌曲或者歌词</Button>
+          <Button type="primary" icon={<UploadOutlined />}>上传歌曲或歌词</Button>
         </Upload>
         <p className="tips">
           <span>支持歌曲格式 { supportMusicFormat.join('，')}</span>

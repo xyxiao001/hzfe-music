@@ -1,18 +1,43 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './index.scss'
 // import Upload from '../Upload'
 import { InterfaceMusicInfo } from '../../Interface/music';
 import Lrc from '../Lrc';
 import Control from '../Control';
 import LrcWord from '../Lrc/Lrc-word';
-import FastAverageColor from 'fast-average-color';
-import { setLightness, setSaturation } from 'polished';
-import { getMusicInfoFromLocal } from '../../utils/local';
-import { DownOutlined } from '@ant-design/icons';
-import { observer } from "mobx-react"
+import PlayingIcon from '../Playing-icon';
+import LyricsManager from '../LyricsManager';
+import MarqueeText from '../MarqueeText';
+import { FastAverageColor, type FastAverageColorResult } from 'fast-average-color';
+import { rgba, setLightness, setSaturation } from 'polished';
+import { CaretRightOutlined, DownOutlined, SoundOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { Modal } from 'antd';
+import { observer } from "mobx-react-lite"
 import common from '../../store/common';
+import MusicMetaEditor from '../MusicMetaEditor';
 
 const fac = new FastAverageColor();
+const fallbackCover = '/images/music-no.jpeg'
+const fallbackAccent = '#ff375f'
+const loadColorImage = (src: string) => new Promise<HTMLImageElement>((resolve, reject) => {
+  const image = new Image()
+  image.onload = () => {
+    if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+      resolve(image)
+      return
+    }
+    reject(new Error(`Invalid image size: ${image.naturalWidth}x${image.naturalHeight}`))
+  }
+  image.onerror = () => reject(new Error(`Image load failed: ${src}`))
+  image.src = src
+})
+const getSafeAccentColor = (color: string, lightness: number, saturation: number) => {
+  try {
+    return setSaturation(saturation, setLightness(lightness, color || fallbackAccent))
+  } catch (error: unknown) {
+    return fallbackAccent
+  }
+}
 
 const Player = observer(() => {
 
@@ -25,11 +50,35 @@ const Player = observer(() => {
   const musicData = common.musicData
 
   const [currentLrc, setCurrentLrc] = useState('')
+  const [queueVisible, setQueueVisible] = useState(false)
 
   const refChange = useRef(false)
+  const musicInfoRequestRef = useRef(0)
 
   // 主题色
   const musicColor = common.musicColor
+  const coverCandidates = useMemo(() => {
+    return Array.from(new Set([
+      musicInfo?.picture?.[0],
+      musicInfo?.pictureUrl,
+      fallbackCover
+    ].filter(Boolean) as string[]))
+  }, [musicInfo?.picture, musicInfo?.pictureUrl])
+  const [coverIndex, setCoverIndex] = useState(0)
+  const displayCoverSrc = coverCandidates[coverIndex] || fallbackCover
+  const artworkSrc = displayCoverSrc
+  const hasLrc = Boolean(musicInfo?.lrc)
+  const currentIndex = common.musicPlayList.findIndex(item => item.id === musicData.id)
+  const queueItems = currentIndex >= 0
+    ? [
+        ...common.musicPlayList.slice(currentIndex),
+        ...common.musicPlayList.slice(0, currentIndex)
+      ].filter(Boolean)
+    : common.musicPlayList
+
+  useEffect(() => {
+    setCoverIndex(0)
+  }, [coverCandidates])
 
   const handleChanging = (value: number) => {
     // 当前拖动时间的改变
@@ -55,17 +104,6 @@ const Player = observer(() => {
     })
   }
 
-  const getInfoFormLocal = useCallback(async () => {
-    return new Promise(async (resolve, reject) => {
-      const res = await getMusicInfoFromLocal(musicData.id)
-      if (res) {
-        resolve(res)
-      } else {
-        reject('歌曲信息获取失败')
-      }
-    })
-  }, [musicData.id])
-
   // 歌曲停止事件
   // const handleStop = useCallback(() => {
   //   if (musicPlayer) {
@@ -86,21 +124,49 @@ const Player = observer(() => {
 
   const getMusicInfo = useCallback(async () => {
     if (!musicData.id) return
-    const info: InterfaceMusicInfo = await getInfoFormLocal() as InterfaceMusicInfo
+    const requestId = musicInfoRequestRef.current + 1
+    musicInfoRequestRef.current = requestId
+    const info: InterfaceMusicInfo | null = await common.loadMusicInfo(musicData.id)
     if (!info) return
-    common.updatedMusicInfo(info)
-    fac.getColorAsync(info.pictureUrl || '')
-      .then(color => {
-        common.updateMusicColor(
-          setSaturation(.8, setLightness(.5, color.rgba))
-        )
-      })
-      .catch(e => {
-        common.updateMusicColor(
-          '#1890ff'
-        )
-      });
-  }, [getInfoFormLocal, musicData.id])
+    if (musicInfoRequestRef.current !== requestId || common.musicData.id !== info.id) {
+      return
+    }
+    const colorSource = info.pictureUrl || info.picture?.[0] || fallbackCover
+    try {
+      const image = await loadColorImage(colorSource)
+      if (musicInfoRequestRef.current !== requestId || common.musicData.id !== info.id) {
+        return
+      }
+      const color: FastAverageColorResult = fac.getColor(image)
+      common.updateMusicColor(getSafeAccentColor(color.rgba, .5, .8))
+    } catch (error: unknown) {
+      if (musicInfoRequestRef.current !== requestId || common.musicData.id !== info.id) {
+        return
+      }
+      common.updateMusicColor(
+        fallbackAccent
+      )
+    }
+  }, [musicData.id])
+
+  const handleLyricSeek = useCallback((time: number) => {
+    if (!musicPlayer) return
+    musicPlayer.seek(time)
+    common.updatedMusicData({
+      currentTime: time,
+      change: true
+    })
+    if (musicInfo?.lrc) {
+      setCurrentLrc('')
+    }
+  }, [musicInfo?.lrc, musicPlayer])
+
+  const handleCoverError = () => {
+    setCoverIndex((prev) => {
+      if (prev >= coverCandidates.length - 1) return prev
+      return prev + 1
+    })
+  }
 
   // 绑定键盘事件
   const keyDown = useCallback((event: any) => {
@@ -122,21 +188,27 @@ const Player = observer(() => {
     getMusicInfo()
   }, [getMusicInfo])
 
+  useEffect(() => {
+    setCurrentLrc('')
+  }, [musicData.id])
 
   useEffect(() => {
     if (musicInfo && !musicPlayer) {
       setCurrentLrc('')
       common.createdPlayer()
     }
+  }, [musicInfo, musicPlayer])
+
+  useEffect(() => {
     return () => {
-      if (musicPlayer) {
+      if (common.musicPlayer) {
         common.updatedMusicData({
           playing: false
         })
         common.destroyPlayer()
       }
     }
-  }, [musicInfo, musicPlayer])
+  }, [])
 
   useEffect(() => {
     refChange.current = musicData.change
@@ -150,6 +222,26 @@ const Player = observer(() => {
     }
   }, [keyDown])
 
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      common.persistLastMusicState()
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [])
+
+  useEffect(() => {
+    const lyricSeed = currentLrc
+      ? Array.from(currentLrc).reduce((sum, char) => sum + char.charCodeAt(0), 0) % 11
+      : 5
+    const lightness = Math.max(.46, Math.min(.68, .54 + Math.sin(musicData.currentTime * 0.85 + lyricSeed) * .08))
+    const accent = getSafeAccentColor(musicColor, lightness, .96)
+    document.documentElement.style.setProperty('--lyric-accent', accent)
+    document.documentElement.style.setProperty('--lyric-accent-soft', rgba(accent, .2))
+  }, [currentLrc, musicColor, musicData.currentTime])
+
 
   return (
     <section className="player">
@@ -161,11 +253,15 @@ const Player = observer(() => {
                 <section className="player-layout">
                   <section className="layout-left">
                     <section className="music-img" onClick={handelChangeSize}>
-                      <img src={musicInfo.pictureUrl ? musicInfo.pictureUrl : process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
+                      <img src={displayCoverSrc} alt="" onError={handleCoverError} />
                     </section>
                     <section className="player-info">
-                      <p className="music-name">{musicInfo.name}</p>
-                      <p className="music-artist">{musicInfo.artist} - {musicInfo.album}</p>
+                      <MarqueeText className="music-name" text={musicInfo.name} />
+                      <MarqueeText className="music-artist" text={`${musicInfo.artist || '未知歌手'} - ${musicInfo.album || '未命名专辑'}`} />
+                      <section className={`music-current-lrc ${musicData.playing ? 'is-playing' : ''}`}>
+                        {musicData.playing ? <PlayingIcon className="compact" /> : null}
+                        <p>{currentLrc || (hasLrc ? '歌词加载中…' : '暂无歌词')}</p>
+                      </section>
                     </section>
                   </section>
                   <section className="music-progress">
@@ -195,10 +291,8 @@ const Player = observer(() => {
           <section className="status-control" onClick={handelChangeSize}>
             <DownOutlined />
           </section>
-          <section className="player-bg" style={{ "backgroundImage": `url(${musicInfo?.pictureUrl || process.env.PUBLIC_URL + '/images/music-no.jpeg'})` }}></section>
+          <section className="player-bg" style={{ "backgroundImage": `url(${artworkSrc})` }}></section>
           <section className="player-fade"></section>
-          {/* <Upload></Upload> */}
-          {/* 这里去渲染歌曲信息 */}
           <section className="player-layout">
             {
               musicInfo ?
@@ -206,18 +300,20 @@ const Player = observer(() => {
 
                   <section className="player-left">
                     <section className="player-line">
-                      <img src={musicInfo.pictureUrl ? musicInfo.pictureUrl : process.env.PUBLIC_URL + '/images/music-no.jpeg'} alt="" />
+                      <img src={displayCoverSrc} alt="" onError={handleCoverError} />
                     </section>
                     <section className="player-line">
                       <section className="player-info">
-                        <p className="music-name">{musicInfo.name}</p>
-                        <p className="music-artist">{musicInfo.artist} - {musicInfo.album}</p>
-                        <p
-                          className="music-current-lrc"
-                          dangerouslySetInnerHTML={{
-                            __html: currentLrc
-                          }}
-                        ></p>
+                        <MarqueeText className="music-name" text={musicInfo.name} />
+                        <MarqueeText className="music-artist" text={`${musicInfo.artist || '未知歌手'} - ${musicInfo.album || '未命名专辑'}`} />
+                        <section className={`music-current-lrc hero-lrc ${musicData.playing ? 'is-playing' : ''}`}>
+                          {musicData.playing ? <PlayingIcon className="compact" /> : null}
+                          <p
+                            dangerouslySetInnerHTML={{
+                              __html: currentLrc || (hasLrc ? '歌词加载中…' : '暂无歌词')
+                            }}
+                          ></p>
+                        </section>
                       </section>
                     </section>
                     <Control
@@ -229,34 +325,105 @@ const Player = observer(() => {
                       handleChanging={handleChanging}
                       setChange={setChangeFromControl}
                       isPlaying={musicData.playing}></Control>
+                    <section className="player-side-toolbar">
+                      <button className="player-tool-button" onClick={() => setQueueVisible(true)}>
+                        <UnorderedListOutlined />
+                        <span>播放队列</span>
+                      </button>
+                      <LyricsManager currentMusic={musicInfo || null} />
+                      <MusicMetaEditor music={musicInfo || null} triggerLabel="歌曲详情" />
+                    </section>
                   </section>
                   <section className="player-right">
-                    {
-                      musicInfo.lrc?.match(/\](\S)\[/g) ? (
-                        <LrcWord
-                          setCurrentLrc={setCurrentLrc}
-                          color={musicColor}
-                          lrc={musicInfo.lrc || ''}
-                          currentInfo={musicInfo || null}
-                          currentTime={musicData.currentTime}
-                          isPlaying={musicData.playing}></LrcWord>
-                      )
-                        : (
-                          <Lrc
-                            setCurrentLrc={setCurrentLrc}
-                            color={musicColor}
-                            lrc={musicInfo.lrc || ''}
-                            currentInfo={musicInfo || null}
-                            currentTime={musicData.currentTime}
-                            isPlaying={musicData.playing}></Lrc>
-                        )
-                    }
+                    <section className="lyrics-panel">
+                      {!hasLrc && <section className="lyrics-header">
+                         <p className="lyrics-subtitle">{ '歌曲暂未关联歌词'}</p>
+                      </section>}
+                      <section className="lyrics-body">
+                        {
+                          hasLrc ? (
+                            musicInfo.lrc?.match(/\](\S)\[/g) ? (
+                              <LrcWord
+                                setCurrentLrc={setCurrentLrc}
+                                color={musicColor}
+                                lrc={musicInfo.lrc || ''}
+                                currentInfo={musicInfo || null}
+                                currentTime={musicData.currentTime}
+                                isPlaying={musicData.playing}
+                                onSeekTo={handleLyricSeek}></LrcWord>
+                            )
+                              : (
+                                <Lrc
+                                  setCurrentLrc={setCurrentLrc}
+                                  color={musicColor}
+                                  lrc={musicInfo.lrc || ''}
+                                  currentInfo={musicInfo || null}
+                                  currentTime={musicData.currentTime}
+                                  isPlaying={musicData.playing}
+                                  onSeekTo={handleLyricSeek}></Lrc>
+                              )
+                          ) : (
+                            <section className="lyrics-empty">
+                              <p>暂无歌词</p>
+                              <span>你可以在资料库中上传歌词文件，或使用自动关联功能为当前歌曲匹配歌词。</span>
+                            </section>
+                          )
+                        }
+                      </section>
+                    </section>
                   </section>
                 </section> : ''
             }
           </section>
         </section>
       }
+      <Modal
+        title={null}
+        open={queueVisible}
+        onCancel={() => setQueueVisible(false)}
+        footer={null}
+        width={560}
+      >
+        <section className="player-queue-modal">
+          <section className="player-queue-head">
+            <section>
+              <p className="player-queue-title">播放队列</p>
+              <span className="player-queue-subtitle">按当前播放顺序展示，点击任意歌曲可立即切换</span>
+            </section>
+            <section className="player-queue-badge">
+              <SoundOutlined />
+              <span>{queueItems.length} 首</span>
+            </section>
+          </section>
+          {musicInfo ? (
+            <section className="player-queue-now">
+              <span className="player-queue-now-kicker">正在播放</span>
+              <MarqueeText className="player-queue-now-name" text={musicInfo.name} />
+              <MarqueeText className="player-queue-now-meta" text={`${musicInfo.artist || '未知歌手'} · ${musicInfo.album || '未命名专辑'}`} />
+            </section>
+          ) : null}
+          {queueItems.map((item, index) => (
+            <button
+              key={item.id}
+              className={`queue-item ${item.id === musicData.id ? 'is-active' : ''}`.trim()}
+              onClick={() => {
+                common.selectMusic(item.id || '')
+                setQueueVisible(false)
+              }}
+            >
+              <span className="queue-item-index">{String(index + 1).padStart(2, '0')}</span>
+              <section className="queue-item-main">
+                <span className="queue-item-kicker">{item.id === musicData.id ? '正在播放' : index === 0 ? '下一首' : `队列位置 ${index + 1}`}</span>
+                <MarqueeText className="queue-item-name" text={item.name} />
+                <MarqueeText className="queue-item-meta" text={`${item.artist || '未知歌手'} · ${item.album || '未命名专辑'}`} />
+              </section>
+              <span className="queue-item-action">
+                <CaretRightOutlined />
+              </span>
+            </button>
+          ))}
+        </section>
+      </Modal>
     </section>
   );
 })

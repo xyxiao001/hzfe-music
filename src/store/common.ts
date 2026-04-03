@@ -1,16 +1,19 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { InterfaceLrcInfo, InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../Interface/music';
 import { Howl } from 'howler'
-import { getLrcList, getMusicList, removeLrc, removeMusic, setLastPlayType, } from '../utils/local';
+import { getLastMusicState, getLastPlayType, getLrcList, getMusicInfoFromLocal, getMusicList, removeLastMusicState, removeLrc, removeMusic, setLastMusicState, setLastPlayType, updateMusicLrcBinding, updateMusicMeta, upsertLrc } from '../utils/local';
 import { getFormatCode } from '../utils';
 import { cloneDeep } from 'lodash';
 import { message } from 'antd'
 import { EnumPlayingType } from '../utils/enmus';
+
 class Common {
-  @observable
+  constructor() {
+    makeAutoObservable(this, {}, { autoBind: true })
+  }
+
   playingType: `${EnumPlayingType}` = EnumPlayingType.loop
 
-  @action
   updatePlayingType (type: `${EnumPlayingType}`) {
     // 切换当前播放状态 顺序播放 -> 单曲循环 -> 随机播放 -> 顺序播放
     const nextType = type === EnumPlayingType.loop ? EnumPlayingType.single : type === EnumPlayingType.single ? EnumPlayingType.random : EnumPlayingType.loop
@@ -18,20 +21,25 @@ class Common {
     this.playingType = nextType
   }
 
+  setPlayingType (type: `${EnumPlayingType}`) {
+    this.playingType = type
+  }
 
-  @observable
+
   preUrl: string = ''
 
-  @action
   updatePreUrl (url: string) {
     this.preUrl = url
   }
 
-  @observable
   preImgUrl: string[] = []
 
-  @action
+  shouldAutoPlay = true
+
+  resumeTime = 0
+
   updatePreImgUrl (url: string) {
+    if (!url.startsWith('blob:')) return
     this.preImgUrl.push(url)
     if (this.preImgUrl.length >= 5) {
       URL.revokeObjectURL(this.preImgUrl.shift() as string)
@@ -39,10 +47,64 @@ class Common {
   }
   
   // 音乐播放实例
-  @observable
   musicPlayer: Howl | null = null
 
-  @action
+  musicInfoRequestToken = 0
+
+  selectMusic (id: string, options?: { autoplay?: boolean, currentTime?: number }) {
+    if (!id) return
+    this.destroyPlayer()
+    this.musicInfo = null
+    this.musicInfoRequestToken += 1
+    this.shouldAutoPlay = options?.autoplay ?? true
+    this.resumeTime = options?.currentTime ?? 0
+    this.updatedMusicData({
+      id,
+      currentTime: options?.currentTime ?? 0,
+      duration: 0,
+      playing: false,
+      change: false
+    })
+  }
+
+  persistLastMusicState (data?: Partial<{ id: string, currentTime: number, min: boolean }>) {
+    const id = data?.id ?? this.musicData.id
+    if (!id) {
+      removeLastMusicState()
+      return
+    }
+    setLastMusicState({
+      id,
+      currentTime: data?.currentTime ?? Number(this.musicPlayer?.seek() || this.musicData.currentTime || 0),
+      min: data?.min ?? this.musicData.min
+    })
+  }
+
+  hydratePlayerState = async () => {
+    const [playType] = await Promise.all([
+      getLastPlayType(),
+      this.updateLocalMusicList(),
+      this.updateLocalMusicLrcList()
+    ])
+    this.setPlayingType(playType)
+    const lastMusicState = await getLastMusicState()
+    if (!lastMusicState) return
+    const target = this.localMusicList.find(item => item.id === lastMusicState.id)
+    if (!target?.id) {
+      removeLastMusicState()
+      return
+    }
+    this.shouldAutoPlay = false
+    this.resumeTime = lastMusicState.currentTime || 0
+    this.updatedMusicData({
+      id: target.id,
+      currentTime: lastMusicState.currentTime || 0,
+      min: lastMusicState.min,
+      playing: false,
+      change: false
+    })
+  }
+
   createdPlayer () {
     if (this.musicInfo && this.musicInfo.music) {
       this.updatedMusicData({
@@ -54,12 +116,31 @@ class Common {
       }
       this.updatePreUrl(url)
       this.updatePreImgUrl(this.musicInfo.pictureUrl || '')
+      const shouldAutoPlay = this.shouldAutoPlay
+      const resumeTime = this.resumeTime
       this.musicPlayer = new Howl({
-        autoplay: true,
+        autoplay: false,
         src: url,
         html5: true,
         format: [getFormatCode(this.musicInfo.codec.toLowerCase() || String(this.musicInfo.fileType).toLowerCase())],
         volume: 1,
+        onload: () => {
+          const duration = Number(this.musicPlayer?.duration() || 0)
+          const nextTime = Math.min(resumeTime, duration || resumeTime || 0)
+          if (nextTime > 0) {
+            this.musicPlayer?.seek(nextTime)
+          }
+          this.updatedMusicData({
+            currentTime: nextTime,
+            duration,
+            playing: false
+          })
+          if (shouldAutoPlay) {
+            this.musicPlayer?.play()
+          }
+          this.resumeTime = 0
+          this.shouldAutoPlay = true
+        },
         onplay: this.handlePlay,
         onpause: this.handlePause,
         onend: this.handleEnd,
@@ -125,7 +206,7 @@ class Common {
         artist: this.musicInfo.artist,
         album: this.musicInfo.album,
         artwork: [{
-          src: this.musicInfo.pictureUrl || '',
+          src: this.musicInfo.picture[0] || this.musicInfo.pictureUrl || '',
           type: 'image/jpeg',
           sizes: '512x512'
         }]
@@ -139,12 +220,16 @@ class Common {
       currentTime: this.musicPlayer?.seek(),
       playing: false,
     })
+    this.persistLastMusicState()
   }
 
   handleEnd = () => {
     this.updatedMusicData({
       currentTime: this.musicPlayer?.seek(),
       playing: false,
+    })
+    this.persistLastMusicState({
+      currentTime: Number(this.musicPlayer?.seek() || 0)
     })
     requestAnimationFrame(this.handlePlaying)
     console.log('歌曲播放完了')
@@ -157,6 +242,7 @@ class Common {
       currentTime: this.musicPlayer?.seek(),
       playing: false,
     })
+    this.persistLastMusicState()
   }
 
   handlePlaying = () => {
@@ -177,27 +263,49 @@ class Common {
     }
   }
 
-  @action
   destroyPlayer () {
+    this.musicPlayer?.unload()
     this.musicPlayer = null
   }
 
 
-  @observable
   musicInfo: InterfaceMusicInfo | null = null
 
-  @action
   updatedMusicInfo (data: InterfaceMusicInfo) {
-    if (data.picture.length === 0) {
-      data.picture = [`${process.env.PUBLIC_URL}/images/music-no.jpeg`]
-    }
+    data.pictureUrl = data.pictureUrl || data.picture[0] || '/images/music-no.jpeg'
     this.musicInfo = data
+  }
+
+  loadMusicInfo = async (id: string) => {
+    if (!id) return null
+    const requestToken = this.musicInfoRequestToken
+    const info = await getMusicInfoFromLocal(id).catch(() => null)
+    if (!info || this.musicData.id !== id || requestToken !== this.musicInfoRequestToken) {
+      return null
+    }
+    this.updatedMusicInfo(info)
+    return info
+  }
+
+  resetPlayback () {
+    this.destroyPlayer()
+    this.musicInfo = null
+    this.resumeTime = 0
+    this.shouldAutoPlay = true
+    this.musicData = {
+      ...this.musicData,
+      id: '',
+      playing: false,
+      duration: 0,
+      currentTime: 0,
+      change: false
+    }
+    removeLastMusicState()
   }
   
  
 
   // 当前音乐播放的数据
-  @observable
   musicData: InterfaceMusicPlayingInfo  = {
     id: '',
     playing: false,
@@ -207,7 +315,6 @@ class Common {
     min: true
   }
 
-  @action
   updatedMusicData (data: any) {
     if (data.type === 'update') {
       this.musicData.currentTime = data.currentTime
@@ -231,20 +338,24 @@ class Common {
       ...this.musicData,
       ...data
     }
+    if (data.hasOwnProperty('id') || data.hasOwnProperty('min')) {
+      this.persistLastMusicState({
+        id: this.musicData.id,
+        currentTime: this.musicData.currentTime,
+        min: this.musicData.min
+      })
+    }
   }
 
   // 播放器状态
-  @observable
   musicPlayerStats = {
     // 播放器循环状态  单曲播放 single, 随机 random 顺序播放 order
     loop: 'random'
   }
   
   // 播放下一首，上一首功能实现
-  @observable
   musicPlayList: InterfaceMusicInfo[] = []
 
-  @action
   updateMusicPlayList = (list: InterfaceMusicInfo[]) => {
     this.musicPlayList = list
   }
@@ -262,9 +373,7 @@ class Common {
     // 随机播放
     if (this.playingType === EnumPlayingType.random && this.musicPlayList.length > 2) {
       const randomIndex = Math.floor(Math.random() * this.musicPlayList.length)
-      common.updatedMusicData({
-        id: this.musicPlayList[randomIndex].id,
-      })
+      this.selectMusic(this.musicPlayList[randomIndex].id || '')
       return
     }
     let cur = 0
@@ -281,9 +390,7 @@ class Common {
     if (this.musicPlayList[next].id === this.musicData.id) {
       this.musicPlayer?.play()
     } else {
-      common.updatedMusicData({
-        id: this.musicPlayList[next].id
-      })
+      this.selectMusic(this.musicPlayList[next].id || '')
     }
   }
 
@@ -300,9 +407,7 @@ class Common {
     // 随机播放
     if (this.playingType === EnumPlayingType.random && this.musicPlayList.length > 2) {
       const randomIndex = Math.floor(Math.random() * this.musicPlayList.length)
-      common.updatedMusicData({
-        id: this.musicPlayList[randomIndex].id,
-      })
+      this.selectMusic(this.musicPlayList[randomIndex].id || '')
       return
     }
     let cur = 0
@@ -319,22 +424,16 @@ class Common {
     if (this.musicPlayList[pre].id === this.musicData.id) {
       this.musicPlayer?.play()
     } else {
-      common.updatedMusicData({
-        id: this.musicPlayList[pre].id
-      })
+      this.selectMusic(this.musicPlayList[pre].id || '')
     }
   }
 
   // 本地音乐展示列表
-  @observable
   localMusicList: InterfaceMusicInfo[] = []
-  @observable
   localMusicLoading: boolean = false
-  @observable
   localAlbumMap: Map<string, InterfaceMusicInfo[]> = new Map()
 
   // 专辑生成说明，歌曲列表根据专辑的名称集合数组
-  @action
   updateLocalAlbumList = () => {
     const map = new Map()
     this.localMusicList.forEach(item => {
@@ -345,7 +444,6 @@ class Common {
     this.localAlbumMap = map
   }
 
-  @action
   updateLocalMusicList = async () => {
     this.localMusicLoading = true
     this.localMusicList = await getMusicList()
@@ -356,9 +454,12 @@ class Common {
   }
 
   // 删除歌曲, 操作列表删除当前歌曲，同时删除歌曲文件流
-  @action deleteMusic = async (id: string) => {
+  deleteMusic = async (id: string) => {
     try {
       await removeMusic(id)
+      if (this.musicData.id === id) {
+        this.resetPlayback()
+      }
       message.success('删除成功')
       this.updateLocalMusicList()
     } catch (error) {
@@ -370,22 +471,91 @@ class Common {
 
   // 本地歌词展示列表
   localMusicLrcList: InterfaceLrcInfo[] = []
-  @observable
   localMusicLrcLoading: boolean = false
 
-  @action
   updateLocalMusicLrcList = async () => {
     this.localMusicLrcLoading = true
     this.localMusicLrcList = await getLrcList()
     this.localMusicLrcLoading = false
   }
 
+  refreshCurrentMusicInfo = async () => {
+    if (!this.musicData.id) return
+    await this.loadMusicInfo(this.musicData.id)
+  }
+
+  saveMusicLrcBinding = async (payload: {
+    musicId: string
+    lrcKey?: string
+    lrcContent?: string
+    lrcFileName?: string
+  }) => {
+    const { musicId, lrcKey, lrcContent, lrcFileName } = payload
+    if (lrcContent && lrcFileName) {
+      await upsertLrc({
+        content: lrcContent,
+        fileName: lrcFileName,
+        fileType: 'lrc',
+        fileSize: `${new Blob([lrcContent]).size} B`,
+        size: new Blob([lrcContent]).size
+      })
+    }
+    await updateMusicLrcBinding(musicId, lrcKey)
+    await Promise.all([
+      this.updateLocalMusicList(),
+      this.updateLocalMusicLrcList()
+    ])
+    if (this.musicData.id === musicId) {
+      await this.refreshCurrentMusicInfo()
+    }
+  }
+
+  saveLrcContent = async (payload: {
+    fileName: string
+    content: string
+  }) => {
+    const { fileName, content } = payload
+    await upsertLrc({
+      content,
+      fileName,
+      fileType: 'lrc',
+      fileSize: `${new Blob([content]).size} B`,
+      size: new Blob([content]).size
+    })
+    await this.updateLocalMusicLrcList()
+    if (this.musicData.id && this.musicInfo?.lrcKey === fileName) {
+      await this.refreshCurrentMusicInfo()
+    }
+  }
+
+  saveMusicMeta = async (payload: {
+    musicId: string
+    name: string
+    artist: string
+    album: string
+  }) => {
+    await updateMusicMeta(payload.musicId, {
+      name: payload.name,
+      artist: payload.artist,
+      album: payload.album,
+      albumartist: payload.artist
+    })
+    await this.updateLocalMusicList()
+    if (this.musicData.id === payload.musicId) {
+      await this.refreshCurrentMusicInfo()
+    }
+  }
+
   // 删除歌曲, 操作列表删除当前歌曲，同时删除歌曲文件流
-  @action deleteLrc = async (id: string) => {
+  deleteLrc = async (id: string) => {
     try {
       await removeLrc(id)
       message.success('删除成功')
       this.updateLocalMusicLrcList()
+      this.updateLocalMusicList()
+      if (this.musicData.id) {
+        this.refreshCurrentMusicInfo()
+      }
     } catch (error) {
       console.log(error)
       message.error('删除失败')
@@ -393,10 +563,8 @@ class Common {
   }
 
   // 音乐播放时修改全局主题色
-  @observable
-  musicColor = '#1890ff'
+  musicColor = '#ff375f'
 
-  @action
   updateMusicColor = (color: string) => {
     this.musicColor = color
     document.documentElement.style.setProperty('--primary-color', color)
@@ -409,4 +577,3 @@ const common = new Common()
 
  
 export default common
-

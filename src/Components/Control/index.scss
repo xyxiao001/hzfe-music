@@ -1,15 +1,15 @@
 .player-control {
   width: 100%;
-  justify-content: center;
+
   p {
     margin: 0
   }
 
   .control {
-    width: 30vw;
-    max-width: 50vh;
+    width: min(100%, 420px);
     height: 120px;
     margin: auto;
+
     .control-line {
       display: flex;
       justify-content: space-between;
@@ -26,8 +26,10 @@
       width: 100%;
       display: flex;
       justify-content: space-between;
-      opacity: .5;
+      opacity: .7;
       line-height: 30px;
+      font-size: 12px;
+      letter-spacing: 0.06em;
     }
   
     .line-center {
@@ -46,12 +48,15 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 40px;
-        height: 40px;
+        width: 64px;
+        height: 64px;
         padding: 10px;
         cursor: pointer;
         color: white;
-        margin: 0 20px;
+        margin: 0 18px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff375f 0%, #ff6b6b 100%);
+        box-shadow: 0 20px 40px rgba(255, 55, 95, 0.3);
       }
   
       .icon-play, .icon-pause {
@@ -70,8 +75,9 @@
     .control-icon-list {
       display: flex;
       align-items: center;
-      font-size: 35px;
+      font-size: 28px;
       color: white;
+      gap: 8px;
 
       p {
         cursor: pointer;
@@ -79,6 +85,7 @@
   
         &:hover {
           opacity: .8;
+          transform: translateY(-1px);
         }
       }
     }
@@ -88,14 +95,15 @@
     display: flex;
     align-items: center;
     user-select: none;
-    margin-left: 30px;
     width: 100%;
+    gap: 18px;
 
     .control-icon-list {
       display: flex;
       align-items: center;
-      font-size: 35px;
-      color: white;
+      font-size: 24px;
+      color: #1f1f29;
+      gap: 8px;
 
       p {
         cursor: pointer;
@@ -103,6 +111,7 @@
   
         &:hover {
           opacity: .8;
+          transform: translateY(-1px);
         }
       }
     }
@@ -111,23 +120,28 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
-      font-size: 35px;
+      width: 52px;
+      height: 52px;
+      font-size: 30px;
       padding: 10px;
       cursor: pointer;
-      margin: 0 5px;
+      margin: 0 4px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff375f 0%, #ff6b6b 100%);
+      box-shadow: 0 16px 28px rgba(255, 55, 95, 0.28);
     }
 
     .control-progress {
-      margin-left: 20px;
       width: 100%;
     }
 
     .line-left {
-      margin-left: 20px;
       width: 150px;
       flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      color: rgba(31, 31, 41, 0.52);
+      font-size: 12px;
     }
   }
 }
@@ -142,6 +156,6 @@
 
   svg {
     width: 24px;
-    margin-left: 10px;
+    margin-left: 6px;
   }
 }

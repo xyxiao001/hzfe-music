@@ -231,14 +231,9 @@ export const getWordLineProgress = (lrcItem: InterfaceLrcWord[], time: number): 
 
 // 滚动函数
 export const goScroll = (top: number, target: HTMLElement) => {
-  let requestAnimationFrame: any = null
-  if (window.requestAnimationFrame) {
-    requestAnimationFrame = window.requestAnimationFrame
-  } else {
-    requestAnimationFrame = setTimeout((fn) => {
-      fn()
-    }, 17)
-  }
+  const requestAnimationFrame: (callback: FrameRequestCallback) => number = window.requestAnimationFrame
+    ? window.requestAnimationFrame.bind(window)
+    : (callback) => window.setTimeout(callback, 17)
   // 当前时间
   let t = 0
   // 初始值

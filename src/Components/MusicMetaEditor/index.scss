@@ -1,0 +1,74 @@
+.music-meta-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.music-meta-cover {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 24px;
+  background: rgba(255, 55, 95, 0.06);
+
+  img {
+    width: 88px;
+    height: 88px;
+    object-fit: cover;
+    border-radius: 20px;
+  }
+}
+
+.music-meta-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.music-meta-subtitle {
+  color: rgba(31, 31, 41, 0.56);
+  font-size: 13px;
+}
+
+.music-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.music-meta-label {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(31, 31, 41, 0.72);
+}
+
+.music-meta-value {
+  min-height: 32px;
+  padding: 5px 11px;
+  border-radius: 10px;
+  background: rgba(31, 31, 41, 0.04);
+  color: rgba(31, 31, 41, 0.62);
+  line-height: 22px;
+}
+
+.music-meta-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.music-meta-tags {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media screen and (max-width: 720px) {
+  .music-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}

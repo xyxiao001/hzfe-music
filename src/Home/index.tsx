@@ -1,36 +1,41 @@
-import React from 'react';
-import { NavLink, Route, Switch } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { SoundOutlined } from '@ant-design/icons';
+import { observer } from 'mobx-react-lite';
 import Player from '../Components/Player';
 import Locale from '../Local';
-import Love from '../Love';
+import common from '../store/common';
 import './index.scss'
-const Home = () => {
+
+const Home = observer(() => {
+  useEffect(() => {
+    common.hydratePlayerState()
+  }, [])
 
   return (
     <section className="page-home">
       <section className="wrapper-box">
-        <section className="nav">
-          <p className="nav-item">
-            <NavLink to="/">本地音乐</NavLink>
-          </p>
-          <p className="nav-item">
-            <NavLink to="/like" exact>在线音乐</NavLink>
-          </p>
+        <section className="app-header">
+          <section className="brand">
+            <span className="brand-icon">
+              <SoundOutlined />
+            </span>
+            <section>
+              <p className="brand-title">HZFE Music</p>
+              <p className="brand-subtitle">本地音乐资料库</p>
+            </section>
+          </section>
+          <section className="brand-meta">
+            <span>{common.localMusicList.length} 首歌曲</span>
+            <span>{common.localAlbumMap.size} 张专辑</span>
+          </section>
         </section>
         <section className="music-box">
-          <Switch>
-            <Route path="/like" exact>
-              <Love />
-            </Route>
-            <Route path="/" exact>
-              <Locale />
-            </Route>
-          </Switch>
+          <Locale />
         </section>
       </section>
       <Player />
     </section>
   );
-}
+})
 
 export default Home

@@ -1,9 +1,9 @@
 import { supportMusicFormat, supportMusicLrcFormat } from '../config'
 import { loadFile, transformMusicInfo } from '../utils';
-import filesize from 'filesize'
+import { filesize } from 'filesize'
 import { InterfaceMusicInfo } from '../Interface/music';
 import { addLrc, addMusic } from '../utils/local';
-import * as musicMetadata from 'music-metadata-browser'
+import { parseBlob } from 'music-metadata'
 import { message } from 'antd';
 import common from '../store/common';
 import upload from '../store/upload';
@@ -44,7 +44,7 @@ const handleMusicData = async (File: File) => {
   let result
   try {
     blob = await loadFile(File, true)
-    result = await musicMetadata.parseBlob(blob)
+    result = await parseBlob(blob)
   } catch (error) {
     message.warning(`目前还不支持处理${FileType}这种类型文件，${FileName}`)
     return
@@ -61,7 +61,7 @@ const handleMusicData = async (File: File) => {
     console.log(`${File.name}  上传成功`)
     common.updateLocalMusicList()
   } catch (error) {
-    message.warning(error)
+    message.warning(String(error))
   }
 }
 
@@ -90,6 +90,6 @@ const handleMusicLrc = async (File: File) => {
     message.success(`${File.name}  上传成功`)
     console.log(`${File.name}  上传成功`)
   } catch (error) {
-    message.warning(error)
+    message.warning(String(error))
   }
 }

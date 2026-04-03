@@ -1,0 +1,53 @@
+.lyrics-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.manager-header {
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(255, 55, 95, 0.06);
+}
+
+.manager-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.manager-subtitle {
+  color: rgba(31, 31, 41, 0.56);
+  font-size: 13px;
+}
+
+.manager-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.manager-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.manager-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.manager-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(31, 31, 41, 0.76);
+}
+
+.manager-tip {
+  color: rgba(31, 31, 41, 0.52);
+  font-size: 12px;
+  line-height: 1.8;
+}

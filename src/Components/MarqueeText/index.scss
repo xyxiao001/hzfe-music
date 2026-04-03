@@ -1,0 +1,31 @@
+.marquee-text {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-track {
+  display: inline-block;
+  min-width: 100%;
+}
+
+.marquee-text.is-overflow {
+  display: flex;
+  gap: 48px;
+
+  .marquee-track {
+    min-width: max-content;
+    animation: marquee-slide 12s linear infinite;
+  }
+}
+
+@keyframes marquee-slide {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(calc(-100% - 48px), 0, 0);
+  }
+}

@@ -19,6 +19,12 @@ import { dataURLtoBlob } from '.'
 import { InterfaceLrcInfo, InterfaceMusicInfo } from '../Interface/music'
 import { EnumPlayingType } from './enmus'
 
+export interface InterfaceLastMusicState {
+  id: string
+  currentTime: number
+  min: boolean
+}
+
  /**
   * 添加歌词的存储方法
   * key: music-lrc-list
@@ -81,6 +87,38 @@ export const removeMusic = async (id: string):Promise<Boolean> => {
   })
 }
 
+export const updateMusicLrcBinding = async (id: string, lrcKey?: string): Promise<InterfaceMusicInfo | null> => {
+  const key = 'music-list'
+  const list: InterfaceMusicInfo[] = await localforage.getItem(key) || []
+  let target: InterfaceMusicInfo | null = null
+  const nextList = list.map(item => {
+    if (item.id !== id) return item
+    target = {
+      ...item,
+      lrcKey
+    }
+    return target
+  })
+  await localforage.setItem(key, nextList)
+  return target
+}
+
+export const updateMusicMeta = async (id: string, payload: Partial<Pick<InterfaceMusicInfo, 'name' | 'artist' | 'album' | 'albumartist' | 'comment'>>): Promise<InterfaceMusicInfo | null> => {
+  const key = 'music-list'
+  const list: InterfaceMusicInfo[] = await localforage.getItem(key) || []
+  let target: InterfaceMusicInfo | null = null
+  const nextList = list.map(item => {
+    if (item.id !== id) return item
+    target = {
+      ...item,
+      ...payload
+    }
+    return target
+  })
+  await localforage.setItem(key, nextList)
+  return target
+}
+
 // 获取歌曲列表
 export const getMusicList = async ():Promise<InterfaceMusicInfo[]>  => {
   const key = 'music-list'
@@ -123,6 +161,16 @@ export const removeLrc = async (id: string):Promise<Boolean> => {
       let list: InterfaceMusicInfo[] = await localforage.getItem(key)  || []
       list = list.filter(item => item.fileName !== id)
       await localforage.setItem('music-lrc-list', list)
+      const musicList = await getMusicList()
+      await localforage.setItem('music-list', musicList.map(item => {
+        if (item.lrcKey === id) {
+          return {
+            ...item,
+            lrcKey: ''
+          }
+        }
+        return item
+      }))
       resolve(true)
     } catch (error) {
       reject(error)
@@ -153,6 +201,22 @@ export const MusicRelatedLrc = (): Promise<string> => {
   })
 }
 
+export const upsertLrc = async (lrc: InterfaceLrcInfo): Promise<InterfaceLrcInfo[]> => {
+  const key = 'music-lrc-list'
+  const list: InterfaceLrcInfo[] = await localforage.getItem(key) || []
+  const index = list.findIndex(item => item.fileName === lrc.fileName)
+  if (index >= 0) {
+    list[index] = {
+      ...list[index],
+      ...lrc
+    }
+  } else {
+    list.push(lrc)
+  }
+  await localforage.setItem(key, list)
+  return list
+}
+
 // 获取上次播放类型
 export const getLastPlayType = async (): Promise<`${EnumPlayingType}`> => {
   const key = 'last-play-type'
@@ -165,4 +229,18 @@ export const setLastPlayType = async (type: `${EnumPlayingType}`): Promise<`${En
   const key = 'last-play-type'
   await localforage.setItem(key, type)
   return type
+}
+
+export const getLastMusicState = async (): Promise<InterfaceLastMusicState | null> => {
+  const state = await localforage.getItem('last-music-state') as InterfaceLastMusicState | null
+  return state
+}
+
+export const setLastMusicState = async (state: InterfaceLastMusicState): Promise<InterfaceLastMusicState> => {
+  await localforage.setItem('last-music-state', state)
+  return state
+}
+
+export const removeLastMusicState = async (): Promise<void> => {
+  await localforage.removeItem('last-music-state')
 }
