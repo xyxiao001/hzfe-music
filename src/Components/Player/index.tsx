@@ -157,8 +157,7 @@ const Player = observer(() => {
     if (!musicPlayer) return
     musicPlayer.seek(time)
     common.updatedMusicData({
-      currentTime: time,
-      change: true
+      currentTime: time
     })
     if (musicInfo?.lrc) {
       setCurrentLrc('')
