@@ -15,6 +15,7 @@ import { Modal } from 'antd';
 import { observer } from "mobx-react-lite"
 import common from '../../store/common';
 import MusicMetaEditor from '../MusicMetaEditor';
+import { formatTime } from '../../utils';
 
 const fac = new FastAverageColor();
 const fallbackCover = '/images/music-no.jpeg'
@@ -75,6 +76,9 @@ const Player = observer(() => {
         ...common.musicPlayList.slice(0, currentIndex)
       ].filter(Boolean)
     : common.musicPlayList
+  const nowPlayingItem = queueItems.find(item => item.id === musicData.id) || musicInfo || null
+  const upcomingQueueItems = queueItems.filter(item => item.id !== musicData.id)
+  const queueTotalDuration = queueItems.reduce((total, item) => total + Number(item.duration || 0), 0)
 
   useEffect(() => {
     setCoverIndex(0)
@@ -382,46 +386,109 @@ const Player = observer(() => {
         open={queueVisible}
         onCancel={() => setQueueVisible(false)}
         footer={null}
-        width={560}
+        width={640}
+        className="player-queue-dialog"
       >
         <section className="player-queue-modal">
           <section className="player-queue-head">
-            <section>
+            <section className="player-queue-copy">
+              <span className="player-queue-eyebrow">Up Next</span>
               <p className="player-queue-title">播放队列</p>
-              <span className="player-queue-subtitle">按当前播放顺序展示，点击任意歌曲可立即切换</span>
+              <span className="player-queue-subtitle">参考 Apple 列表层次重新整理，优先展示当前播放与接下来要听的内容</span>
             </section>
-            <section className="player-queue-badge">
-              <SoundOutlined />
-              <span>{queueItems.length} 首</span>
+            <section className="player-queue-stats">
+              <section className="player-queue-badge">
+                <SoundOutlined />
+                <span>{queueItems.length} 首</span>
+              </section>
+              <section className="player-queue-badge">
+                <span>{formatTime(queueTotalDuration || 0)}</span>
+              </section>
             </section>
           </section>
-          {musicInfo ? (
-            <section className="player-queue-now">
-              <span className="player-queue-now-kicker">正在播放</span>
-              <MarqueeText className="player-queue-now-name" text={musicInfo.name} />
-              <MarqueeText className="player-queue-now-meta" text={`${musicInfo.artist || '未知歌手'} · ${musicInfo.album || '未命名专辑'}`} />
+          {nowPlayingItem ? (
+            <section className="player-queue-section">
+              <section className="player-queue-section-head">
+                <span>正在播放</span>
+                <span>{musicData.playing ? '播放中' : '已暂停'}</span>
+              </section>
+              <button
+                className="player-queue-now"
+                onClick={() => {
+                  if (nowPlayingItem.id) {
+                    common.selectMusic(nowPlayingItem.id)
+                  }
+                  setQueueVisible(false)
+                }}
+              >
+                <img
+                  className="player-queue-cover"
+                  src={nowPlayingItem.picture?.[0] || nowPlayingItem.pictureUrl || fallbackCover}
+                  alt=""
+                  onError={(event) => {
+                    event.currentTarget.src = fallbackCover
+                  }}
+                />
+                <section className="player-queue-now-main">
+                  <section className="player-queue-now-topline">
+                    <span className="player-queue-now-kicker">正在播放</span>
+                    <span className="player-queue-now-duration">{formatTime(nowPlayingItem.duration || musicData.duration || 0)}</span>
+                  </section>
+                  <MarqueeText className="player-queue-now-name" text={nowPlayingItem.name} />
+                  <MarqueeText className="player-queue-now-meta" text={`${nowPlayingItem.artist || '未知歌手'} · ${nowPlayingItem.album || '未命名专辑'}`} />
+                </section>
+                <span className="player-queue-now-action">
+                  <CaretRightOutlined />
+                </span>
+              </button>
             </section>
           ) : null}
-          {queueItems.map((item, index) => (
-            <button
-              key={item.id}
-              className={`queue-item ${item.id === musicData.id ? 'is-active' : ''}`.trim()}
-              onClick={() => {
-                common.selectMusic(item.id || '')
-                setQueueVisible(false)
-              }}
-            >
-              <span className="queue-item-index">{String(index + 1).padStart(2, '0')}</span>
-              <section className="queue-item-main">
-                <span className="queue-item-kicker">{item.id === musicData.id ? '正在播放' : index === 0 ? '下一首' : `队列位置 ${index + 1}`}</span>
-                <MarqueeText className="queue-item-name" text={item.name} />
-                <MarqueeText className="queue-item-meta" text={`${item.artist || '未知歌手'} · ${item.album || '未命名专辑'}`} />
+          {upcomingQueueItems.length ? (
+            <section className="player-queue-section">
+              <section className="player-queue-section-head">
+                <span>接下来播放</span>
+                <span>{upcomingQueueItems.length} 首</span>
               </section>
-              <span className="queue-item-action">
-                <CaretRightOutlined />
-              </span>
-            </button>
-          ))}
+              <section className="player-queue-list">
+                {upcomingQueueItems.map((item, index) => (
+                  <button
+                    key={item.id}
+                    className="queue-item"
+                    onClick={() => {
+                      common.selectMusic(item.id || '')
+                      setQueueVisible(false)
+                    }}
+                  >
+                    <span className="queue-item-index">{String(index + 1).padStart(2, '0')}</span>
+                    <img
+                      className="queue-item-cover"
+                      src={item.picture?.[0] || item.pictureUrl || fallbackCover}
+                      alt=""
+                      onError={(event) => {
+                        event.currentTarget.src = fallbackCover
+                      }}
+                    />
+                    <section className="queue-item-main">
+                      <span className="queue-item-kicker">{index === 0 ? '下一首' : '稍后播放'}</span>
+                      <MarqueeText className="queue-item-name" text={item.name} />
+                      <MarqueeText className="queue-item-meta" text={`${item.artist || '未知歌手'} · ${item.album || '未命名专辑'}`} />
+                    </section>
+                    <section className="queue-item-side">
+                      <span className="queue-item-duration">{formatTime(item.duration || 0)}</span>
+                      <span className="queue-item-action">
+                        <CaretRightOutlined />
+                      </span>
+                    </section>
+                  </button>
+                ))}
+              </section>
+            </section>
+          ) : (
+            <section className="player-queue-empty">
+              <p>队列里还没有下一首</p>
+              <span>从歌曲列表重新选择音乐后，这里会按当前顺序展示后续播放内容。</span>
+            </section>
+          )}
         </section>
       </Modal>
     </section>
