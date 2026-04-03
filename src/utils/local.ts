@@ -25,6 +25,82 @@ export interface InterfaceLastMusicState {
   min: boolean
 }
 
+const normalizeMatchText = (value: string) => {
+  return value
+    .toLowerCase()
+    .replace(/\.[a-z0-9]+$/i, '')
+    .replace(/[\(\[【（].*?[\)\]】）]/g, ' ')
+    .replace(/(?:feat|ft)\.?\s+[^-_—–]+/gi, ' ')
+    .replace(/[_\-—–·]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+const compactMatchText = (value: string) => {
+  return normalizeMatchText(value).replace(/[^a-z0-9\u4e00-\u9fa5]/gi, '')
+}
+
+const splitMatchTokens = (value: string) => {
+  return normalizeMatchText(value)
+    .split(/[^a-z0-9\u4e00-\u9fa5]+/gi)
+    .map(item => item.trim())
+    .filter(Boolean)
+}
+
+const createMusicMatchCandidates = (music: InterfaceMusicInfo) => {
+  return Array.from(new Set([
+    music.name,
+    music.fileName,
+    [music.artist, music.name].filter(Boolean).join(' '),
+    [music.artist, music.fileName].filter(Boolean).join(' ')
+  ].filter(Boolean) as string[]))
+}
+
+const getMatchScore = (music: InterfaceMusicInfo, lrc: InterfaceLrcInfo) => {
+  const lrcCompact = compactMatchText(lrc.fileName)
+  const lrcTokens = splitMatchTokens(lrc.fileName)
+  let bestScore = 0
+  createMusicMatchCandidates(music).forEach(candidate => {
+    const candidateCompact = compactMatchText(candidate)
+    const candidateTokens = splitMatchTokens(candidate)
+    if (!candidateCompact) {
+      return
+    }
+    if (candidateCompact === lrcCompact) {
+      bestScore = Math.max(bestScore, 100)
+      return
+    }
+    if (candidateCompact.length >= 4 && (lrcCompact.includes(candidateCompact) || candidateCompact.includes(lrcCompact))) {
+      bestScore = Math.max(bestScore, 92)
+    }
+    if (candidateTokens.length) {
+      const commonTokenCount = candidateTokens.filter(token => lrcTokens.includes(token)).length
+      if (commonTokenCount === candidateTokens.length && commonTokenCount > 0) {
+        bestScore = Math.max(bestScore, 86 + Math.min(commonTokenCount, 3))
+      } else if (commonTokenCount >= 2) {
+        bestScore = Math.max(bestScore, 78 + Math.min(commonTokenCount, 4))
+      }
+    }
+  })
+  return bestScore
+}
+
+const getBestMatchLrc = (music: InterfaceMusicInfo, lrcList: InterfaceLrcInfo[]): InterfaceLrcInfo | null => {
+  let bestMatch: InterfaceLrcInfo | null = null
+  let bestScore = 0
+  lrcList.forEach(lrc => {
+    const score = getMatchScore(music, lrc)
+    if (score > bestScore) {
+      bestScore = score
+      bestMatch = lrc
+    }
+  })
+  if (!bestMatch || bestScore < 86) {
+    return null
+  }
+  return bestMatch
+}
+
  /**
   * 添加歌词的存储方法
   * key: music-lrc-list
@@ -185,20 +261,57 @@ export const MusicRelatedLrc = (): Promise<string> => {
       let musicList = await getMusicList()
       const lrcList = await getLrcList()
       musicList = musicList.map((item: InterfaceMusicInfo) => {
-        lrcList.forEach((lrc: InterfaceLrcInfo) => {
-          if (lrc.fileName.includes(item.name)) {
-            item.lrcKey = lrc.fileName
-          }
-        })
+        if (item.lrcKey) return item
+        const target = getBestMatchLrc(item, lrcList)
+        if (target) {
+          item.lrcKey = target.fileName
+        }
         return item
       })
-      // console.log(musicList)
       await localforage.setItem('music-list', musicList)
       resolve('success')
     } catch (error) {
       reject(error)
     }
   })
+}
+
+export const autoBindMusicLrc = async (params?: {
+  musicFileNames?: string[]
+  lrcFileNames?: string[]
+  overwrite?: boolean
+}): Promise<number> => {
+  const musicList = await getMusicList()
+  const lrcList = await getLrcList()
+  const musicFileNameSet = params?.musicFileNames?.length ? new Set(params.musicFileNames) : null
+  const lrcFileNameSet = params?.lrcFileNames?.length ? new Set(params.lrcFileNames) : null
+  let changed = false
+  let matchedCount = 0
+  const nextList = musicList.map(item => {
+    if (musicFileNameSet && !musicFileNameSet.has(item.fileName || '')) {
+      return item
+    }
+    if (!params?.overwrite && item.lrcKey) {
+      return item
+    }
+    const candidates = lrcFileNameSet
+      ? lrcList.filter(lrc => lrcFileNameSet.has(lrc.fileName))
+      : lrcList
+    const target = getBestMatchLrc(item, candidates)
+    if (!target || target.fileName === item.lrcKey) {
+      return item
+    }
+    changed = true
+    matchedCount += 1
+    return {
+      ...item,
+      lrcKey: target.fileName
+    }
+  })
+  if (changed) {
+    await localforage.setItem('music-list', nextList)
+  }
+  return matchedCount
 }
 
 export const upsertLrc = async (lrc: InterfaceLrcInfo): Promise<InterfaceLrcInfo[]> => {

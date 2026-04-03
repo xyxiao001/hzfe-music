@@ -10,10 +10,16 @@ class Upload {
   // 文件上传的处理
   isUploading: boolean = false
 
-  uploadList: File[] = []
+  uploadList: Array<() => Promise<void>> = []
 
   addUploadTask = (File: File) => {
-    this.uploadList.push(File)
+    this.addTask(async () => {
+      await uploadRun(File)
+    })
+  }
+
+  addTask = (task: () => Promise<void>) => {
+    this.uploadList.push(task)
     this.checkUpload()
   }
 
@@ -26,14 +32,18 @@ class Upload {
 
   // 处理上传的数据
   handleUpload = async () => {
+    const target = this.uploadList.shift()
+    if (!target) {
+      return
+    }
     try {
       this.isUploading = true
-      const target = this.uploadList.shift() as File;
-      await uploadRun(target)
-      this.isUploading = false
-      this.checkUpload()
+      await target()
     } catch (error) {
       console.log(error)
+    } finally {
+      this.isUploading = false
+      this.checkUpload()
     }
   }
 }

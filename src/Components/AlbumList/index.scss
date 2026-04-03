@@ -82,6 +82,40 @@
     opacity: 0.72;
   }
 
+  .music-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 6px;
+    scrollbar-gutter: stable;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      width: 0;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &:hover {
+      scrollbar-width: thin;
+    }
+
+    &:hover::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.28);
+    }
+  }
+
   .music-item {
     display: flex;
     align-items: center;
