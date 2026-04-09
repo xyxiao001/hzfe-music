@@ -1,7 +1,7 @@
 import { makeAutoObservable } from 'mobx';
 import { InterfaceLrcInfo, InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../Interface/music';
 import { Howl } from 'howler'
-import { getLastMusicState, getLastPlayType, getLrcList, getMusicInfoFromLocal, getMusicList, removeLastMusicState, removeLrc, removeMusic, setLastMusicState, setLastPlayType, updateMusicLrcBinding, updateMusicMeta, upsertLrc } from '../utils/local';
+import { getLastMuted, getLastMusicState, getLastPlayType, getLastVolume, getLrcList, getMusicInfoFromLocal, getMusicList, removeLastMusicState, removeLrc, removeMusic, setLastMuted, setLastMusicState, setLastPlayType, setLastVolume, updateMusicLrcBinding, updateMusicMeta, upsertLrc } from '../utils/local';
 import { getFormatCode } from '../utils';
 import { cloneDeep } from 'lodash';
 import { message } from 'antd'
@@ -13,6 +13,49 @@ class Common {
   }
 
   playingType: `${EnumPlayingType}` = EnumPlayingType.loop
+
+  volume = 1
+
+  muted = false
+
+  playbackErrorState = {
+    consecutive: 0,
+    lastMusicId: '',
+    lastAt: 0,
+    retried: false
+  }
+
+  resetPlaybackErrorState () {
+    this.playbackErrorState = {
+      consecutive: 0,
+      lastMusicId: '',
+      lastAt: 0,
+      retried: false
+    }
+  }
+
+  setMuted (muted: boolean) {
+    const nextMuted = Boolean(muted)
+    this.muted = nextMuted
+    this.musicPlayer?.mute(nextMuted)
+    void setLastMuted(nextMuted)
+  }
+
+  toggleMuted () {
+    this.setMuted(!this.muted)
+  }
+
+  setVolume (volume: number) {
+    const nextVolume = Math.max(0, Math.min(1, Number(volume)))
+    this.volume = nextVolume
+    this.musicPlayer?.volume(nextVolume)
+    void setLastVolume(nextVolume)
+    if (nextVolume === 0) {
+      this.setMuted(true)
+    } else if (this.muted) {
+      this.setMuted(false)
+    }
+  }
 
   updatePlayingType (type: `${EnumPlayingType}`) {
     // 切换当前播放状态 顺序播放 -> 单曲循环 -> 随机播放 -> 顺序播放
@@ -81,12 +124,16 @@ class Common {
   }
 
   hydratePlayerState = async () => {
-    const [playType] = await Promise.all([
+    const [playType, volume, muted] = await Promise.all([
       getLastPlayType(),
+      getLastVolume(),
+      getLastMuted(),
       this.updateLocalMusicList(),
       this.updateLocalMusicLrcList()
     ])
     this.setPlayingType(playType)
+    this.volume = volume
+    this.muted = muted
     const lastMusicState = await getLastMusicState()
     if (!lastMusicState) return
     const target = this.localMusicList.find(item => item.id === lastMusicState.id)
@@ -105,8 +152,76 @@ class Common {
     })
   }
 
+  handlePlayerError = (type: 'load' | 'play', soundId?: number, errorCode?: unknown) => {
+    const currentId = this.musicData.id
+    if (!currentId) return
+
+    const now = Date.now()
+    const shouldReset = this.playbackErrorState.lastMusicId !== currentId || now - this.playbackErrorState.lastAt > 12000
+    if (shouldReset) {
+      this.resetPlaybackErrorState()
+    }
+    this.playbackErrorState.lastMusicId = currentId
+    this.playbackErrorState.lastAt = now
+    this.playbackErrorState.consecutive += 1
+
+    this.updatedMusicData({
+      playing: false
+    })
+    this.persistLastMusicState({
+      currentTime: Number(this.musicPlayer?.seek() || this.musicData.currentTime || 0)
+    })
+
+    const name = this.musicInfo?.name || this.musicInfo?.fileName || '当前歌曲'
+    const detail = errorCode === undefined || errorCode === null ? '' : `（${String(errorCode)}）`
+
+    if (type === 'play' && !this.playbackErrorState.retried && this.musicPlayer) {
+      this.playbackErrorState.retried = true
+      message.warning({
+        key: 'playback-error',
+        content: `${name} 播放失败，正在重试${detail}`,
+        duration: 2
+      })
+      this.musicPlayer.once('unlock', () => {
+        this.musicPlayer?.play(soundId)
+      })
+      this.musicPlayer.play(soundId)
+      return
+    }
+
+    if (this.musicPlayList.length <= 1) {
+      message.error({
+        key: 'playback-error',
+        content: `${name} 无法播放${detail}`,
+        duration: 3
+      })
+      this.resetPlayback()
+      return
+    }
+
+    if (this.playbackErrorState.consecutive >= 3) {
+      message.error({
+        key: 'playback-error',
+        content: `连续多首歌曲无法播放，已停止播放`,
+        duration: 3
+      })
+      this.resetPlayback()
+      return
+    }
+
+    message.error({
+      key: 'playback-error',
+      content: `${name} 无法播放，已自动跳到下一首${detail}`,
+      duration: 3
+    })
+    window.setTimeout(() => {
+      this.handleNextMusic(true)
+    }, 0)
+  }
+
   createdPlayer () {
     if (this.musicInfo && this.musicInfo.music) {
+      this.resetPlaybackErrorState()
       this.updatedMusicData({
         playing: false,
       })
@@ -123,8 +238,9 @@ class Common {
         src: url,
         html5: true,
         format: [getFormatCode(this.musicInfo.codec.toLowerCase() || String(this.musicInfo.fileType).toLowerCase())],
-        volume: 1,
+        volume: this.volume,
         onload: () => {
+          this.resetPlaybackErrorState()
           const duration = Number(this.musicPlayer?.duration() || 0)
           const nextTime = Math.min(resumeTime, duration || resumeTime || 0)
           if (nextTime > 0) {
@@ -141,11 +257,18 @@ class Common {
           this.resumeTime = 0
           this.shouldAutoPlay = true
         },
+        onloaderror: (soundId, errorCode) => {
+          this.handlePlayerError('load', soundId, errorCode)
+        },
         onplay: this.handlePlay,
+        onplayerror: (soundId, errorCode) => {
+          this.handlePlayerError('play', soundId, errorCode)
+        },
         onpause: this.handlePause,
         onend: this.handleEnd,
         onstop: this.handleStop
       })
+      this.musicPlayer.mute(this.muted)
       const navigator: any = window.navigator
       if (navigator.mediaSession) {
         navigator.mediaSession.setActionHandler('play', () => {
@@ -188,6 +311,7 @@ class Common {
   }
 
   handlePlay = () => {
+    this.resetPlaybackErrorState()
     console.log('歌曲播放了', this.musicInfo?.name);
     this.updatedMusicData({
       currentTime: this.musicPlayer?.seek(),
@@ -360,6 +484,78 @@ class Common {
     this.musicPlayList = list
   }
 
+  refreshQueueFromLocal = () => {
+    if (!this.musicPlayList.length) return
+    const idMap = new Map(this.localMusicList.map(item => [item.id, item]))
+    const next: InterfaceMusicInfo[] = []
+    this.musicPlayList.forEach(item => {
+      if (!item.id) return
+      const updated = idMap.get(item.id)
+      if (updated) next.push(updated)
+    })
+    this.musicPlayList = next
+  }
+
+  setQueueFromScope = (ids: string[], startId?: string) => {
+    const idSet = new Set(ids.filter(Boolean))
+    const next: InterfaceMusicInfo[] = []
+    this.localMusicList.forEach(item => {
+      if (item.id && idSet.has(item.id)) {
+        next.push(item)
+      }
+    })
+    this.updateMusicPlayList(next)
+    if (startId) {
+      this.selectMusic(startId)
+    }
+  }
+
+  removeFromQueue = (id: string) => {
+    if (!id) return
+    const currentId = this.musicData.id
+    const removedIndex = this.musicPlayList.findIndex(item => item.id === id)
+    const next = this.musicPlayList.filter(item => item.id !== id)
+    this.updateMusicPlayList(next)
+    if (id === currentId) {
+      if (next.length === 0) {
+        this.resetPlayback()
+        return
+      }
+      const targetIndex = removedIndex < 0 ? 0 : Math.min(removedIndex, next.length - 1)
+      const target = next[targetIndex] || next[0]
+      this.selectMusic(target.id || '')
+    }
+  }
+
+  clearQueue = (keepCurrent = true) => {
+    if (keepCurrent && this.musicData.id) {
+      const cur = this.localMusicList.find(item => item.id === this.musicData.id)
+      if (!cur) {
+        this.updateMusicPlayList([])
+        this.resetPlayback()
+        return
+      }
+      this.updateMusicPlayList([cur])
+      return
+    }
+    this.updateMusicPlayList([])
+    this.resetPlayback()
+  }
+
+  playNext = (id: string) => {
+    if (!id) return
+    const item = this.localMusicList.find(m => m.id === id)
+    if (!item) return
+    const curId = this.musicData.id
+    const list = this.musicPlayList.filter(m => m.id !== id)
+    let curIndex = list.findIndex(m => m.id === curId)
+    if (curIndex < 0) {
+      curIndex = -1
+    }
+    list.splice(curIndex + 1, 0, item)
+    this.updateMusicPlayList(list)
+  }
+
   // 歌曲播放下一首, 如果是手动切换的，那么还是需要切换到下一首
   handleNextMusic = (isControl = true) => {
     if (this.musicPlayer) {
@@ -446,9 +642,19 @@ class Common {
 
   updateLocalMusicList = async () => {
     this.localMusicLoading = true
+    const previousLibraryIds = new Set(this.localMusicList.map(item => item.id).filter(Boolean) as string[])
+    const wasLibraryQueue = Boolean(
+      this.musicPlayList.length &&
+      previousLibraryIds.size > 0 &&
+      this.musicPlayList.length === previousLibraryIds.size &&
+      this.musicPlayList.every(item => item.id && previousLibraryIds.has(item.id))
+    )
     this.localMusicList = await getMusicList()
-    // 用来做播放列表更新
-    this.updateMusicPlayList(cloneDeep(this.localMusicList))
+    if (this.musicPlayList.length === 0 || wasLibraryQueue) {
+      this.updateMusicPlayList(cloneDeep(this.localMusicList))
+    } else {
+      this.refreshQueueFromLocal()
+    }
     this.updateLocalAlbumList()
     this.localMusicLoading = false
   }

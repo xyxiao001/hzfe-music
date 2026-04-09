@@ -607,6 +607,24 @@
   flex-shrink: 0;
 }
 
+.player-queue-clear {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(255, 55, 95, 0.12);
+  color: rgba(255, 55, 95, 0.92);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .2s ease, opacity .2s ease;
+
+  &:hover {
+    opacity: .9;
+    transform: translateY(-1px);
+  }
+}
+
 .player-queue-badge {
   height: 36px;
   padding: 0 14px;
@@ -814,6 +832,25 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+}
+
+.queue-item-action-btn {
+  border: 0;
+  padding: 0 10px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(31, 31, 41, 0.06);
+  color: rgba(31, 31, 41, 0.78);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform .2s ease, opacity .2s ease;
+
+  &:hover {
+    opacity: .88;
+    transform: translateY(-1px);
+  }
 }
 
 .queue-item-duration {

@@ -11,7 +11,11 @@ const AlbmuList = observer(() => {
   const list = [...map.keys()]
   const musicData = common.musicData
 
-  const handlePlayClick = (item: InterfaceMusicInfo) => {
+  const handlePlayClick = (item: InterfaceMusicInfo, scope?: InterfaceMusicInfo[]) => {
+    if (scope && scope.length) {
+      const ids = scope.map(info => info.id || '').filter(Boolean)
+      common.setQueueFromScope(ids)
+    }
     if (item.id !== musicData.id) {
       common.selectMusic(item.id || '')
     } else {
@@ -36,7 +40,7 @@ const AlbmuList = observer(() => {
               <section className="album-show">
                 <section className="album-meta">
                   <span className="album-kicker">ALBUM</span>
-                  <button className="album-play" onClick={() => handlePlayClick(info[0])}>
+                  <button className="album-play" onClick={() => handlePlayClick(info[0], info)}>
                     <CaretRightFilled />
                   </button>
                 </section>
@@ -48,7 +52,7 @@ const AlbmuList = observer(() => {
                       <p
                         key={music.name}
                         className={`music-item ${music.id === musicData.id ? 'active' : ''}`}
-                        onClick={() => handlePlayClick(music)}
+                        onClick={() => handlePlayClick(music, info)}
                       >
                         <span>
                           { music.name }

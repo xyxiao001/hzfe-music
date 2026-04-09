@@ -357,3 +357,26 @@ export const setLastMusicState = async (state: InterfaceLastMusicState): Promise
 export const removeLastMusicState = async (): Promise<void> => {
   await localforage.removeItem('last-music-state')
 }
+
+export const getLastVolume = async (): Promise<number> => {
+  const volume = await localforage.getItem('last-volume')
+  const value = typeof volume === 'number' ? volume : 1
+  if (!Number.isFinite(value)) return 1
+  return Math.max(0, Math.min(1, value))
+}
+
+export const setLastVolume = async (volume: number): Promise<number> => {
+  const value = Math.max(0, Math.min(1, Number(volume)))
+  await localforage.setItem('last-volume', value)
+  return value
+}
+
+export const getLastMuted = async (): Promise<boolean> => {
+  const muted = await localforage.getItem('last-muted')
+  return Boolean(muted)
+}
+
+export const setLastMuted = async (muted: boolean): Promise<boolean> => {
+  await localforage.setItem('last-muted', Boolean(muted))
+  return Boolean(muted)
+}

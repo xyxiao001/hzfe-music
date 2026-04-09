@@ -3,11 +3,13 @@ import './index.scss'
 import { InterfaceMusicInfo, InterfaceMusicPlayingInfo } from '../../Interface/music';
 import { formatTime } from '../../utils';
 import Progress from '../Progress';
-import { PauseCircleOutlined, PlayCircleOutlined, StepBackwardOutlined, StepForwardOutlined } from '@ant-design/icons';
+import { AudioMutedOutlined, PauseCircleOutlined, PlayCircleOutlined, SoundOutlined, StepBackwardOutlined, StepForwardOutlined } from '@ant-design/icons';
 import common from '../../store/common';
 import PlayingType from './playingType';
+import { Slider } from 'antd';
+import { observer } from 'mobx-react-lite';
 
-const Control = (props: {
+const Control = observer((props: {
   currentInfo: InterfaceMusicInfo | null,
   currentTime: number,
   isPlaying: boolean,
@@ -27,6 +29,14 @@ const Control = (props: {
       (props.currentTime / allTime) * 100
     )
   }, [props.currentInfo, props.currentTime, props.musicPlayingInfo.duration])
+
+  const isMuted = common.muted || common.volume <= 0
+  const volumeValue = Math.round(common.volume * 100)
+
+  const handleVolumeChange = (value: number | number[]) => {
+    const next = Array.isArray(value) ? value[0] : value
+    common.setVolume(next / 100)
+  }
 
   return (
     <section className="player-control">
@@ -58,9 +68,21 @@ const Control = (props: {
                 <StepForwardOutlined />
               </p>
               <PlayingType></PlayingType>
+              <p onClick={() => common.toggleMuted()} className="volume-toggle">
+                {isMuted ? <AudioMutedOutlined /> : <SoundOutlined />}
+              </p>
             </section>
             <section className="control-progress">
               <Progress range={Number(range.toFixed(2))} handleChanging={props.handleChanging} setChange={props.setChange}></Progress>
+            </section>
+            <section className="control-volume">
+              <Slider
+                min={0}
+                max={100}
+                step={1}
+                value={volumeValue}
+                onChange={handleVolumeChange}
+              />
             </section>
             <section className="line-left">
               <span> {formatTime(props.currentTime || 0)} </span>
@@ -107,12 +129,28 @@ const Control = (props: {
             </section>
                 </section>
               </section>
+              <section className="control-volume">
+                <button
+                  className="volume-toggle"
+                  type="button"
+                  onClick={() => common.toggleMuted()}
+                >
+                  {isMuted ? <AudioMutedOutlined /> : <SoundOutlined />}
+                </button>
+                <Slider
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={volumeValue}
+                  onChange={handleVolumeChange}
+                />
+              </section>
             </section>
           )
       }
 
     </section>
   )
-}
+})
 
 export default Control

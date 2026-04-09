@@ -311,11 +311,7 @@ const Player = observer(() => {
                         <MarqueeText className="music-artist" text={`${musicInfo.artist || '未知歌手'} - ${musicInfo.album || '未命名专辑'}`} />
                         <section className={`music-current-lrc hero-lrc ${musicData.playing ? 'is-playing' : ''}`}>
                           {musicData.playing ? <PlayingIcon className="compact" /> : null}
-                          <p
-                            dangerouslySetInnerHTML={{
-                              __html: currentLrc || (hasLrc ? '歌词加载中…' : '暂无歌词')
-                            }}
-                          ></p>
+                          <p>{currentLrc || (hasLrc ? '歌词加载中…' : '暂无歌词')}</p>
                         </section>
                       </section>
                     </section>
@@ -403,6 +399,15 @@ const Player = observer(() => {
               <section className="player-queue-badge">
                 <span>{formatTime(queueTotalDuration || 0)}</span>
               </section>
+              <button
+                className="player-queue-clear"
+                onClick={() => {
+                  common.clearQueue(true)
+                  setQueueVisible(false)
+                }}
+              >
+                清空后续
+              </button>
             </section>
           </section>
           {nowPlayingItem ? (
@@ -474,9 +479,27 @@ const Player = observer(() => {
                     </section>
                     <section className="queue-item-side">
                       <span className="queue-item-duration">{formatTime(item.duration || 0)}</span>
-                      <span className="queue-item-action">
+                      <span className="queue-item-action" title="播放">
                         <CaretRightOutlined />
                       </span>
+                      <button
+                        className="queue-item-action-btn"
+                        onClick={(evt) => {
+                          evt.stopPropagation()
+                          common.playNext(item.id || '')
+                        }}
+                      >
+                        下一首播放
+                      </button>
+                      <button
+                        className="queue-item-action-btn"
+                        onClick={(evt) => {
+                          evt.stopPropagation()
+                          common.removeFromQueue(item.id || '')
+                        }}
+                      >
+                        移除
+                      </button>
                     </section>
                   </button>
                 ))}

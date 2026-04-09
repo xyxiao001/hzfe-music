@@ -164,10 +164,8 @@ const Lrc = (props: {
               className={`${getLrcChooseName(index)} ${seekFeedbackTime === lrcItem.time ? 'line-seeked' : ''}`.trim()}
               onClick={() => handleSeekClick(lrcItem.time)}
               data-time={lrcItem.time.toFixed(2)}
-              dangerouslySetInnerHTML={{
-                __html: lrcItem.text
-              }}
             >
+              {lrcItem.text}
             </p>
           ))
         }

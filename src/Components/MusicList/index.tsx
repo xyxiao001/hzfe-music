@@ -133,6 +133,8 @@ const MusicList = observer(() => {
   ]
 
   const handlePlayClick = (item: InterfaceMusicInfo) => {
+    const ids = filteredList.map(info => info.id || '').filter(Boolean)
+    common.setQueueFromScope(ids)
     if (item.id !== musicData.id) {
       common.selectMusic(item.id || '')
     } else {

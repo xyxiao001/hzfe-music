@@ -7,7 +7,8 @@
 
   .control {
     width: min(100%, 420px);
-    height: 120px;
+    min-height: 120px;
+    height: auto;
     margin: auto;
 
     .control-line {
@@ -89,6 +90,40 @@
         }
       }
     }
+
+    .control-volume {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      margin-bottom: 14px;
+      width: 100%;
+
+      .volume-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border: 0;
+        padding: 0;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
+        cursor: pointer;
+        transition: all .2s ease-in-out;
+
+        &:hover {
+          opacity: .85;
+          transform: translateY(-1px);
+        }
+      }
+
+      .ant-slider {
+        flex: 1;
+        margin: 0;
+      }
+    }
   }
 
   .control-min {
@@ -135,6 +170,15 @@
       width: 100%;
     }
 
+    .control-volume {
+      width: 120px;
+      flex-shrink: 0;
+
+      .ant-slider {
+        margin: 0;
+      }
+    }
+
     .line-left {
       width: 150px;
       flex-shrink: 0;
@@ -142,6 +186,15 @@
       justify-content: space-between;
       color: rgba(31, 31, 41, 0.52);
       font-size: 12px;
+    }
+
+    .volume-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
     }
   }
 }
