@@ -79,6 +79,7 @@ const Player = observer(() => {
   const nowPlayingItem = queueItems.find(item => item.id === musicData.id) || musicInfo || null
   const upcomingQueueItems = queueItems.filter(item => item.id !== musicData.id)
   const queueTotalDuration = queueItems.reduce((total, item) => total + Number(item.duration || 0), 0)
+  const canSelectNowPlaying = Boolean(nowPlayingItem?.id) && nowPlayingItem?.id !== musicData.id
 
   useEffect(() => {
     setCoverIndex(0)
@@ -418,7 +419,9 @@ const Player = observer(() => {
               </section>
               <button
                 className="player-queue-now"
+                disabled={!canSelectNowPlaying}
                 onClick={() => {
+                  if (!canSelectNowPlaying) return
                   if (nowPlayingItem.id) {
                     common.selectMusic(nowPlayingItem.id)
                   }
