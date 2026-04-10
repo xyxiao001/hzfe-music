@@ -72,6 +72,13 @@
   padding: 6px 0;
 }
 
+.rail-divider {
+  height: 1px;
+  margin: 10px 8px;
+  background: rgba(31, 31, 41, 0.08);
+  border-radius: 999px;
+}
+
 .rail-item {
   display: flex;
   align-items: center;

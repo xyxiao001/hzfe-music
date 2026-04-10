@@ -20,12 +20,12 @@
 
 .hero-now {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 200px;
+  grid-template-columns: minmax(0, 1fr) 176px;
   align-items: stretch;
 }
 
 .hero-now-main {
-  padding: 24px 26px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -49,7 +49,7 @@
 
 .hero-title {
   margin: 0;
-  font-size: clamp(22px, 2.3vw, 34px);
+  font-size: clamp(20px, 2.1vw, 30px);
   line-height: 1.12;
   font-weight: 900;
   letter-spacing: -0.04em;
@@ -71,7 +71,7 @@
 }
 
 .hero-actions .ant-btn {
-  height: 40px;
+  height: 38px;
   border-radius: 16px;
   font-weight: 700;
 }
@@ -85,30 +85,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 18px;
+  padding: 14px;
   background: linear-gradient(135deg, rgba(255, 55, 95, 0.12) 0%, rgba(255, 107, 107, 0.08) 100%);
 }
 
 .hero-now-art img {
-  width: 164px;
-  height: 164px;
+  width: 138px;
+  height: 138px;
   border-radius: 28px;
   object-fit: cover;
   box-shadow: 0 26px 70px rgba(16, 18, 28, 0.18);
 }
 
 .hero-stats {
-  padding: 18px 18px 14px;
+  padding: 14px 14px 12px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .hero-stat {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 12px 14px;
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.8);
   box-shadow: inset 0 0 0 1px rgba(31, 31, 41, 0.05);
@@ -137,7 +137,7 @@
 }
 
 .stat-value {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 900;
   letter-spacing: -0.04em;
 }
@@ -270,6 +270,27 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.library-secondary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.library-secondary .hero-top-songs {
+  padding: 14px 14px 12px;
+}
+
+.library-secondary .hero-shortcuts {
+  border-radius: 26px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(31, 31, 41, 0.05);
+}
+
+.library-secondary .shortcut {
+  height: 42px;
 }
 
 .section-head {
@@ -484,5 +505,71 @@
   .hero-now-art img {
     width: 140px;
     height: 140px;
+  }
+
+  .library-secondary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (max-height: 860px) {
+  // Ensure recommendations are visible above the fold on shorter screens.
+  .page-library {
+    gap: 16px;
+  }
+
+  .hero-subtitle {
+    display: none;
+  }
+
+  .hero-now-main {
+    gap: 8px;
+  }
+
+  .hero-actions {
+    margin-top: 2px;
+  }
+
+  .hero-now-art img {
+    width: 120px;
+    height: 120px;
+    border-radius: 24px;
+  }
+
+  .library-secondary {
+    display: none;
+  }
+}
+
+@media screen and (max-height: 760px) {
+  .library-hero {
+    gap: 14px;
+  }
+
+  .hero-now {
+    grid-template-columns: minmax(0, 1fr) 148px;
+  }
+
+  .hero-now-art {
+    padding: 12px;
+  }
+
+  .hero-now-art img {
+    width: 110px;
+    height: 110px;
+    border-radius: 22px;
+  }
+
+  .hero-kicker {
+    height: 28px;
+  }
+
+  .hero-title {
+    font-size: 20px;
+  }
+
+  .hero-actions .ant-btn {
+    height: 36px;
+    padding: 0 12px;
   }
 }

@@ -60,6 +60,34 @@
   flex-wrap: wrap;
 }
 
+.music-meta-stats {
+  border-radius: 26px;
+  padding: 14px 14px 12px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(31, 31, 41, 0.05);
+}
+
+.music-meta-stats-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(31, 31, 41, 0.82);
+}
+
+.music-meta-stats-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+
+.music-meta-stats-tip {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(31, 31, 41, 0.56);
+}
+
 .music-meta-tags {
   min-height: 32px;
   display: flex;
@@ -69,6 +97,10 @@
 
 @media screen and (max-width: 720px) {
   .music-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .music-meta-stats-grid {
     grid-template-columns: 1fr;
   }
 }

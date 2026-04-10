@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import Player from '../Components/Player';
@@ -11,6 +11,7 @@ import SongsPage from '../Pages/Songs';
 import LyricsPage from '../Pages/Lyrics';
 import ImportPage from '../Pages/Import';
 import NowPlayingPage from '../Pages/NowPlaying';
+import StatsPage from '../Pages/Stats';
 import './index.scss'
 
 const Home = observer(() => {
@@ -29,6 +30,7 @@ const Home = observer(() => {
           <Route path="songs" element={<SongsPage />} />
           <Route path="lyrics" element={<LyricsPage />} />
           <Route path="import" element={<ImportPage />} />
+          <Route path="stats" element={<StatsPage />} />
           <Route path="now-playing" element={<NowPlayingPage />} />
           <Route path="*" element={<Navigate to="library" replace />} />
         </Route>

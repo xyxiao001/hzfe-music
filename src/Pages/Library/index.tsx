@@ -80,12 +80,25 @@ const LibraryPage = observer(() => {
 
   const handlePlaySong = (song: InterfaceMusicInfo) => {
     const ids = list.map(info => info.id || '').filter(Boolean)
-    common.setQueueFromScope(ids)
-    if (song.id && song.id !== common.musicData.id) {
-      common.selectMusic(song.id)
-    } else {
-      common.musicPlayer?.play()
+    const targetId = song.id || ''
+    const currentId = common.musicData.id
+    if (!targetId) return
+
+    // Clicking the current song should never re-trigger a new Howler sound instance.
+    if (targetId === currentId) {
+      if (!common.musicPlayer) {
+        common.setQueueFromScope(ids, targetId)
+        return
+      }
+      if (common.musicPlayer.playing()) {
+        // Already playing: keep state stable (optionally user can open Now Playing from hero/rail).
+        return
+      }
+      common.musicPlayer.play()
+      return
     }
+
+    common.setQueueFromScope(ids, targetId)
   }
 
   return (
@@ -139,49 +152,6 @@ const LibraryPage = observer(() => {
           <section className="hero-stat">
             <span className="stat-value">{common.localMusicLrcList.length}</span>
             <span className="stat-label">歌词</span>
-          </section>
-
-          {topSongs.length ? (
-            <section className="hero-top-songs">
-              <p className="top-songs-title">常听歌曲</p>
-              {topSongs.slice(0, 4).map(item => {
-                const song = list.find(m => m.id === item.musicId) || null
-                return (
-                  <button
-                    key={item.musicId}
-                    className="top-song-row"
-                    onClick={() => {
-                      if (!song) return
-                      handlePlaySong(song)
-                    }}
-                    disabled={!song}
-                    title={song?.name || item.musicId}
-                  >
-                    <img src={getCover(song)} alt="" onError={(evt) => { evt.currentTarget.src = fallbackCover }} />
-                    <section className="top-song-main">
-                      <span className="top-song-name">{song?.name || '未知歌曲'}</span>
-                      <span className="top-song-meta">{song?.artist || '未知歌手'} · {formatDurationMs(item.totalPlayMs)}</span>
-                    </section>
-                    <span className="top-song-count">{item.playCount}</span>
-                  </button>
-                )
-              })}
-            </section>
-          ) : null}
-
-          <section className="hero-shortcuts">
-            <button className="shortcut" onClick={() => navigate('/albums')}>
-              <span>查看专辑</span>
-              <RightOutlined />
-            </button>
-            <button className="shortcut" onClick={() => navigate('/songs')}>
-              <span>查看歌曲</span>
-              <RightOutlined />
-            </button>
-            <button className="shortcut" onClick={() => navigate('/lyrics')}>
-              <span>管理歌词</span>
-              <RightOutlined />
-            </button>
           </section>
         </section>
       </section>
@@ -251,6 +221,55 @@ const LibraryPage = observer(() => {
             <span>进入“导入”上传本地音频或通过链接导入。</span>
           </section>
         )}
+      </section>
+
+      <section className="library-secondary">
+        <section className="hero-shortcuts">
+          <button className="shortcut" onClick={() => navigate('/albums')}>
+            <span>查看专辑</span>
+            <RightOutlined />
+          </button>
+          <button className="shortcut" onClick={() => navigate('/songs')}>
+            <span>查看歌曲</span>
+            <RightOutlined />
+          </button>
+          <button className="shortcut" onClick={() => navigate('/lyrics')}>
+            <span>管理歌词</span>
+            <RightOutlined />
+          </button>
+          <button className="shortcut" onClick={() => navigate('/stats')}>
+            <span>播放统计</span>
+            <RightOutlined />
+          </button>
+        </section>
+
+        {topSongs.length ? (
+          <section className="hero-top-songs">
+            <p className="top-songs-title">常听歌曲</p>
+            {topSongs.slice(0, 6).map(item => {
+              const song = list.find(m => m.id === item.musicId) || null
+              return (
+                <button
+                  key={item.musicId}
+                  className="top-song-row"
+                  onClick={() => {
+                    if (!song) return
+                    handlePlaySong(song)
+                  }}
+                  disabled={!song}
+                  title={song?.name || item.musicId}
+                >
+                  <img src={getCover(song)} alt="" onError={(evt) => { evt.currentTarget.src = fallbackCover }} />
+                  <section className="top-song-main">
+                    <span className="top-song-name">{song?.name || '未知歌曲'}</span>
+                    <span className="top-song-meta">{song?.artist || '未知歌手'} · {formatDurationMs(item.totalPlayMs)}</span>
+                  </section>
+                  <span className="top-song-count">{item.playCount}</span>
+                </button>
+              )
+            })}
+          </section>
+        ) : null}
       </section>
     </section>
   )

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { observer } from 'mobx-react-lite'
 import {
+  BarChartOutlined,
   CloudUploadOutlined,
   CustomerServiceOutlined,
   FileTextOutlined,
@@ -31,12 +32,19 @@ const ShellLayout = observer(() => {
     { key: 'import', label: '导入', path: '/import', icon: <CloudUploadOutlined /> }
   ]), [])
 
+  // Desktop rail can have extra entries; mobile tabbar stays at 5 items.
+  const railItems: NavItem[] = useMemo(() => ([
+    ...navItems,
+    { key: 'stats', label: '统计', path: '/stats', icon: <BarChartOutlined /> }
+  ]), [navItems])
+
   const activeKey = useMemo(() => {
     const pathname = location.pathname.replace(/\/+$/, '')
     if (pathname.startsWith('/albums')) return 'albums'
     if (pathname.startsWith('/songs')) return 'songs'
     if (pathname.startsWith('/lyrics')) return 'lyrics'
     if (pathname.startsWith('/import')) return 'import'
+    if (pathname.startsWith('/stats')) return 'stats'
     if (pathname.startsWith('/now-playing')) return 'now-playing'
     return 'library'
   }, [location.pathname])
@@ -51,6 +59,8 @@ const ShellLayout = observer(() => {
         return '歌词'
       case 'import':
         return '导入'
+      case 'stats':
+        return '统计'
       case 'now-playing':
         return '正在播放'
       default:
@@ -77,16 +87,18 @@ const ShellLayout = observer(() => {
           </section>
         </section>
         <nav className="rail-nav">
-          {navItems.map(item => (
-            <button
-              key={item.key}
-              type="button"
-              className={`rail-item ${activeKey === item.key ? 'is-active' : ''}`}
-              onClick={() => navigate(item.path)}
-            >
-              <span className="rail-item-icon">{item.icon}</span>
-              <span className="rail-item-label">{item.label}</span>
-            </button>
+          {railItems.map((item) => (
+            <section key={item.key}>
+              {item.key === 'stats' ? <section className="rail-divider" /> : null}
+              <button
+                type="button"
+                className={`rail-item ${activeKey === item.key ? 'is-active' : ''}`}
+                onClick={() => navigate(item.path)}
+              >
+                <span className="rail-item-icon">{item.icon}</span>
+                <span className="rail-item-label">{item.label}</span>
+              </button>
+            </section>
           ))}
         </nav>
         <section className="rail-footer">
