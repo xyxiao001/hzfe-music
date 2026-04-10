@@ -5,6 +5,7 @@ import {
   CloudUploadOutlined,
   CustomerServiceOutlined,
   FileTextOutlined,
+  GithubOutlined,
   HomeOutlined,
   SoundOutlined
 } from '@ant-design/icons'
@@ -63,6 +64,8 @@ const ShellLayout = observer(() => {
     { key: 'lyrics', label: '份歌词', value: common.localMusicLrcList.length }
   ]), [common.localAlbumMap.size, common.localMusicLrcList.length, common.localMusicList.length])
 
+  const githubUrl = 'https://github.com/xyxiao001/hzfe-music'
+
   return (
     <section className="app-shell">
       <aside className="shell-rail" aria-label="主导航">
@@ -106,7 +109,19 @@ const ShellLayout = observer(() => {
       <section className="shell-main">
         <header className="shell-topbar">
           <section className="topbar-left">
-            <p className="topbar-title">{title}</p>
+            <section className="topbar-title-row">
+              <p className="topbar-title">{title}</p>
+              <a
+                className="topbar-github"
+                href={githubUrl}
+                target="_blank"
+                rel="noreferrer"
+                title="GitHub"
+              >
+                <GithubOutlined />
+                <span>GitHub</span>
+              </a>
+            </section>
             <p className="topbar-subtitle">围绕本地上传、专辑浏览、歌词管理与沉浸式播放</p>
           </section>
           <section className="topbar-stats" aria-label="资料库统计">

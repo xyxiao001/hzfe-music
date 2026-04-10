@@ -6,6 +6,7 @@ import { getFormatCode } from '../utils';
 import { cloneDeep } from 'lodash';
 import { message } from 'antd'
 import { EnumPlayingType } from '../utils/enmus';
+import { addPlayTime, incrementPlayCount, incrementSkipCount, markFinished } from '../utils/stats';
 
 class Common {
   constructor() {
@@ -336,10 +337,12 @@ class Common {
         }]
       });
     }
+    this.startPlayStatsSession()
   }
 
   handlePause = () => {
     console.log('歌曲暂停了')
+    this.pausePlayStatsSession()
     this.updatedMusicData({
       currentTime: this.musicPlayer?.seek(),
       playing: false,
@@ -348,6 +351,7 @@ class Common {
   }
 
   handleEnd = () => {
+    void this.flushPlayStats('end')
     this.updatedMusicData({
       currentTime: this.musicPlayer?.seek(),
       playing: false,
@@ -357,11 +361,13 @@ class Common {
     })
     requestAnimationFrame(this.handlePlaying)
     console.log('歌曲播放完了')
+    this.stopPlayStatsSession('end')
     this.handleNextMusic(false)
   }
 
   handleStop = () => {
     console.log('歌曲停止')
+    this.stopPlayStatsSession('stop')
     this.updatedMusicData({
       currentTime: this.musicPlayer?.seek(),
       playing: false,
@@ -388,12 +394,112 @@ class Common {
   }
 
   destroyPlayer () {
+    this.stopPlayStatsSession('reset')
     this.musicPlayer?.unload()
     this.musicPlayer = null
   }
 
 
   musicInfo: InterfaceMusicInfo | null = null
+
+  // Playback stats session (local only). We sample playing progress and persist incrementally.
+  playStatsSession: null | {
+    musicId: string
+    lastSeekSec: number
+    effectivePlayMs: number
+    countedPlay: boolean
+    thresholdSec: number
+  } = null
+  playStatsTimer: number | null = null
+
+  clearPlayStatsTimer () {
+    if (this.playStatsTimer) {
+      window.clearInterval(this.playStatsTimer)
+      this.playStatsTimer = null
+    }
+  }
+
+  stopPlayStatsSession (reason: 'stop' | 'skip' | 'end' | 'reset') {
+    if (!this.playStatsSession) return
+    const currentId = this.playStatsSession.musicId
+    const shouldCountSkip = reason === 'skip' && !this.playStatsSession.countedPlay
+    this.flushPlayStats(reason).finally(() => {
+      if (shouldCountSkip && currentId) {
+        void incrementSkipCount(currentId)
+      }
+      this.playStatsSession = null
+      this.clearPlayStatsTimer()
+    })
+  }
+
+  pausePlayStatsSession () {
+    if (!this.playStatsSession) return
+    void this.flushPlayStats('pause')
+    this.clearPlayStatsTimer()
+  }
+
+  async flushPlayStats (reason: 'pause' | 'stop' | 'skip' | 'end' | 'reset') {
+    const session = this.playStatsSession
+    if (!session) return
+    if (!this.musicPlayer) return
+    if (this.musicData.id !== session.musicId) return
+
+    const now = Date.now()
+    const rawSeek = Number(this.musicPlayer.seek() || 0)
+    const seekSec = Number.isFinite(rawSeek) ? rawSeek : 0
+    const deltaSec = seekSec - session.lastSeekSec
+    // Ignore backward seek or very large jumps (usually user seeking).
+    const safeDeltaSec = deltaSec > 0 && deltaSec < 8 ? deltaSec : 0
+    const deltaMs = Math.floor(safeDeltaSec * 1000)
+
+    if (deltaMs > 0) {
+      session.effectivePlayMs += deltaMs
+      session.lastSeekSec = seekSec
+      void addPlayTime(session.musicId, deltaMs, now)
+    }
+
+    const effectiveSec = session.effectivePlayMs / 1000
+    if (!session.countedPlay && effectiveSec >= session.thresholdSec) {
+      session.countedPlay = true
+      void incrementPlayCount(session.musicId, now)
+    }
+
+    if (reason === 'end') {
+      void markFinished(session.musicId, now)
+    }
+  }
+
+  startPlayStatsSession () {
+    const musicId = this.musicData.id
+    if (!musicId || !this.musicPlayer) return
+    const durationSec = Number(this.musicPlayer.duration() || this.musicInfo?.duration || this.musicData.duration || 0)
+    const thresholdSec = Math.max(5, Math.min(30, durationSec * 0.3))
+    const rawSeek = Number(this.musicPlayer.seek() || 0)
+    const seekSec = Number.isFinite(rawSeek) ? rawSeek : 0
+
+    // Restart if switching songs.
+    if (this.playStatsSession?.musicId && this.playStatsSession.musicId !== musicId) {
+      this.stopPlayStatsSession('skip')
+    } else if (this.playStatsSession?.musicId === musicId) {
+      // Resume same song session after pause.
+      this.playStatsSession.lastSeekSec = seekSec
+      this.playStatsSession.thresholdSec = thresholdSec
+    } else {
+      this.playStatsSession = {
+        musicId,
+        lastSeekSec: seekSec,
+        effectivePlayMs: 0,
+        countedPlay: false,
+        thresholdSec
+      }
+    }
+
+    this.clearPlayStatsTimer()
+    this.playStatsTimer = window.setInterval(() => {
+      if (!this.musicPlayer?.playing()) return
+      void this.flushPlayStats('stop')
+    }, 5000)
+  }
 
   updatedMusicInfo (data: InterfaceMusicInfo) {
     data.pictureUrl = data.pictureUrl || data.picture[0] || '/images/music-no.jpeg'
@@ -581,6 +687,8 @@ class Common {
 
   // 歌曲播放下一首, 如果是手动切换的，那么还是需要切换到下一首
   handleNextMusic = (isControl = true) => {
+    // Flush stats before stopping (stop event may reset seek position).
+    this.stopPlayStatsSession('skip')
     if (this.musicPlayer) {
       this.musicPlayer.stop()
     }
@@ -634,6 +742,7 @@ class Common {
 
   // 歌曲播放上一首
   handlePreMusic = (isControl = true) => {
+    this.stopPlayStatsSession('skip')
     if (this.musicPlayer) {
       this.musicPlayer.stop()
     }
