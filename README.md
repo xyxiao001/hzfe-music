@@ -1,38 +1,44 @@
-# HZFE-MUSIC
+# HZFE Music
 
-一个基于 React 19 + Vite + TypeScript 的本地音乐资料库应用，聚焦本地音乐上传、歌词管理、专辑浏览和沉浸式播放体验。
+一款离线优先的本地音乐资料库应用：上传/导入音乐与歌词，按专辑浏览，沉浸式播放与歌词联动，并提供播放统计与“今日推荐”。
 
-## 项目特性
+- GitHub: https://github.com/xyxiao001/hzfe-music
 
-- 本地音乐库：上传歌曲和歌词文件，数据持久化保存在浏览器本地
-- 专辑视图：按专辑聚合歌曲，适合快速浏览本地收藏
-- 歌曲管理：查看歌曲详情、编辑歌曲名/歌手/专辑信息
-- 歌词管理：支持绑定已有歌词、手动编辑歌词、另存为当前歌曲副本、解除绑定
-- 自动关联：按文件名规则自动尝试关联歌曲与歌词
-- 播放体验：支持播放队列、进度拖拽、歌词联动、主题色跟随封面变化
-- 状态恢复：刷新页面后可恢复上次播放状态
+## 为什么做这个
 
-## 技术栈
+- 不依赖后端：所有歌曲文件、歌词、元信息与播放状态都保存在浏览器本地（localforage）
+- 更像一个 App：支持 PWA、媒体会话（Media Session）、沉浸式播放、播放队列与状态恢复
+- 围绕本地音乐：上传、专辑浏览、歌词管理、沉浸式播放、统计与推荐
 
-- React 19
-- TypeScript
-- Vite 8
-- Ant Design 6
-- MobX 6
-- Howler
-- localForage
-- music-metadata
+## 功能概览
 
-## 安装与运行
+- 本地资料库
+  - 上传/导入音乐与歌词（支持文件与链接导入）
+  - 专辑视图：按专辑聚合浏览
+  - 歌曲管理：编辑歌曲名/歌手/专辑等元信息
+  - 歌词管理：歌词库、绑定/解除、手动编辑、另存为副本
+  - 自动关联：按文件名与“歌手+歌名”等规则尝试关联歌词
+- 播放体验
+  - 大/小播放器切换，沉浸式播放页
+  - 播放队列、上一首/下一首、进度拖拽
+  - 歌词联动（逐字/普通），封面主色驱动氛围色
+  - 播放失败自动容错（跳到下一首）
+  - 刷新后恢复上次播放状态
+- 统计与推荐
+  - 播放统计：播放次数、累计时长、最近播放/最近完整播放、跳过次数
+  - 统计页：最近 7 天趋势 + Top Songs/Artists/Albums
+  - 今日推荐：基于播放行为（新鲜度/跳过惩罚/多样性约束）生成每日推荐歌单与专辑
 
-推荐使用 pnpm。
+## 快速开始
+
+推荐使用 `pnpm`。
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-其他可用脚本：
+其他脚本：
 
 ```bash
 pnpm test
@@ -40,102 +46,94 @@ pnpm build
 pnpm preview
 ```
 
+## 页面导航
+
+- `资料库`：当前播放/今日播放统计/推荐专辑与推荐歌曲
+- `专辑`：专辑网格、专辑详情曲目列表
+- `歌曲`：歌曲列表与播放
+- `歌词`：歌词库与管理
+- `导入`：上传/导入、自动关联歌词、清空资料库
+- `统计`：最近 7 天趋势 + Top 榜单
+
+## 推荐与统计口径（简述）
+
+### 播放次数如何计算
+
+为避免“点一下就算一次”，单次有效播放达到以下阈值才计 1 次播放：
+
+- `min(30 秒, 歌曲时长 * 30%)`，且最少 `5 秒`
+
+### 推荐算法怎么做
+
+“今日推荐”不按导入顺序，而是综合以下信号：
+
+- 亲密度：播放次数与累计播放时长（log 归一化）
+- 新鲜度：常听但最近没听会更容易被推出来
+- 跳过惩罚：经常跳过的歌会降低权重
+- 多样性约束：同艺人/同专辑不会刷屏
+- 每日稳定：按日期 seed 做轻微扰动，确保“今天看起来稳定，但每天会变化”
+
 ## 支持的文件格式
 
-### 音乐格式
+格式定义见 `src/config.ts`。
 
-`mp3`、`ogg`、`wav`、`aac`、`flac`、`dolby`、`opus`、`webm`、`alac`
+- 音乐：`mp3`、`ogg`、`wav`、`aac`、`flac`、`dolby`、`opus`、`webm`、`alac`
+- 歌词：`lrc`、`txt`
 
-### 歌词格式
+## 数据存储与隐私
 
-`lrc`、`txt`
+项目使用 `localforage` 做浏览器侧持久化存储：
 
-## 主要页面
+- 歌曲元信息列表：`music-list`
+- 歌曲音频 Blob：以歌曲 `id` 为 key（元信息与二进制分离，按需读取）
+- 歌词库：`music-lrc-list`
+- 播放状态恢复：`last-music-state`
+- 播放统计：
+  - 单曲统计：`music-stats:<musicId>`
+  - 今日汇总：`stats-daily:<YYYY-MM-DD>`
+  - 全局汇总：`stats-global`
 
-### 本地资料库
+默认不上传任何数据到服务端。清空资料库可在“导入”页一键完成。
 
-- 专辑：按专辑聚合展示本地音乐
-- 歌曲：查看歌曲列表并进行播放、编辑、歌词管理
-- 歌词：查看本地歌词库
+## 音频元信息读取
 
-### 播放器
+上传时通过 `music-metadata` 读取常用字段，例如：
 
-- 大小播放器切换
-- 当前播放队列查看
-- 逐字歌词 / 普通歌词展示
-- 封面主色动态驱动播放器氛围色
+| 属性 | 含义 |
+| ---- | ---- |
+| name | 歌曲名 |
+| album | 专辑名 |
+| artist / artists | 歌手 |
+| picture | 封面图片 |
+| codec | 编码方式 |
+| duration | 时长 |
+| sampleRate | 采样率 |
 
-## 音频信息读取
+## 技术栈
 
-| 属性 | 含义 | 来源 |
-| ---- | ---- | ---- |
-| name | 歌曲名 | common.title |
-| album | 专辑名 | common.album |
-| albumartist | 专辑主导艺人 | common.albumartist |
-| artist | 专辑艺人 | common.artist |
-| artists | 专辑艺人列表 | common.artists |
-| comment | 专辑备注 | common.comment |
-| date | 发行时间 | common.date |
-| picture | 封面图片列表 | common.picture |
-| codec | 编码方式 | format.codec |
-| duration | 时长 | format.duration |
-| sampleRate | 采样率 | common.sampleRate |
-
-## 本地存储设计
-
-项目使用 `localforage` 做浏览器侧持久化存储，核心数据结构如下：
-
-### music-list
-
-歌曲信息列表，核心字段包括：
-
-```ts
-{
-  name: string
-  album: string
-  albumartist: string
-  artist: string
-  artists: string[]
-  comment: string[]
-  date: string
-  picture: string[]
-  codec: string
-  duration: number
-  sampleRate: string
-  lrc: string
-  lrcKey?: string
-  music?: Blob
-  id?: string
-}
-```
-
-### 以歌曲 id 为 key 的音频 Blob
-
-用于存储真实歌曲文件流，列表元信息和音频二进制分离保存，便于按需读取。
-
-### music-lrc-list
-
-本地歌词库，保存歌词文件名、歌词内容等信息，并可与歌曲做绑定关系。
-
-### last-music-state
-
-保存最近一次播放歌曲、播放进度、播放模式等信息，用于页面刷新后的状态恢复。
-
-## 设计说明
-
-- 当前项目以“本地音乐管理 + 本地播放”为核心，不依赖服务端音频解析能力
-- 上传文件后会读取音频元信息，并将歌曲与歌词存入浏览器本地数据库
-- 播放时直接读取本地持久化的音频 Blob
-- 歌词既可以从已有歌词库中绑定，也可以针对当前歌曲单独编辑保存
+- React 19 + TypeScript
+- Vite 8 + Vite PWA
+- React Router v7
+- MobX 6
+- Ant Design 6
+- Howler（音频播放）
+- localForage（本地持久化）
+- music-metadata（元信息解析）
 
 ## 目录结构
 
 ```text
 src/
   Components/            UI 组件与播放器模块
-  Home/                  首页
-  Local/                 本地资料库页面
+  Home/                  应用入口与路由
+  Pages/                 页面级模块（资料库/专辑/统计等）
   Interface/             类型定义
   store/                 MobX 状态管理
-  utils/                 上传、存储、格式化等工具
+  utils/                 上传、存储、推荐、统计等工具
 ```
+
+## Roadmap（可选）
+
+- 推荐解释（Why this）：告诉用户“为何推荐这首/这张专辑”，并支持本地反馈（不再推荐/减少该艺人）
+- 数据导出/导入：跨设备迁移本地资料库
+- 队列增强：拖拽排序、清理已播、去重
