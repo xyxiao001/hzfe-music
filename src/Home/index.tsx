@@ -1,9 +1,16 @@
 import React, { useEffect } from 'react';
-import { SoundOutlined } from '@ant-design/icons';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import Player from '../Components/Player';
-import Locale from '../Local';
 import common from '../store/common';
+import ShellLayout from '../Shell';
+import LibraryPage from '../Pages/Library';
+import AlbumsPage from '../Pages/Albums';
+import AlbumDetailPage from '../Pages/AlbumDetail';
+import SongsPage from '../Pages/Songs';
+import LyricsPage from '../Pages/Lyrics';
+import ImportPage from '../Pages/Import';
+import NowPlayingPage from '../Pages/NowPlaying';
 import './index.scss'
 
 const Home = observer(() => {
@@ -12,27 +19,20 @@ const Home = observer(() => {
   }, [])
 
   return (
-    <section className="page-home">
-      <section className="wrapper-box">
-        <section className="app-header">
-          <section className="brand">
-            <span className="brand-icon">
-              <SoundOutlined />
-            </span>
-            <section>
-              <p className="brand-title">HZFE Music</p>
-              <p className="brand-subtitle">本地音乐资料库</p>
-            </section>
-          </section>
-          <section className="brand-meta">
-            <span>{common.localMusicList.length} 首歌曲</span>
-            <span>{common.localAlbumMap.size} 张专辑</span>
-          </section>
-        </section>
-        <section className="music-box">
-          <Locale />
-        </section>
-      </section>
+    <section className="app-root">
+      <Routes>
+        <Route element={<ShellLayout />}>
+          <Route index element={<Navigate to="library" replace />} />
+          <Route path="library" element={<LibraryPage />} />
+          <Route path="albums" element={<AlbumsPage />} />
+          <Route path="albums/:albumName" element={<AlbumDetailPage />} />
+          <Route path="songs" element={<SongsPage />} />
+          <Route path="lyrics" element={<LyricsPage />} />
+          <Route path="import" element={<ImportPage />} />
+          <Route path="now-playing" element={<NowPlayingPage />} />
+          <Route path="*" element={<Navigate to="library" replace />} />
+        </Route>
+      </Routes>
       <Player />
     </section>
   );

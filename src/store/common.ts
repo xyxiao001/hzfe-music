@@ -284,7 +284,7 @@ class Common {
           const currentTime = Number(evt.seekTime)
           this.musicPlayer?.seek(currentTime)
         })
-        navigator.mediaSession.setActionHandler('seekbackward', (evt: any) => {
+        navigator.mediaSession.setActionHandler('seekbackward', (_evt: any) => {
           this.updatedMusicData({
             change: true
           })
@@ -294,7 +294,7 @@ class Common {
             change: false
           })
         });
-        navigator.mediaSession.setActionHandler('seekforward', (evt: any) => {
+        navigator.mediaSession.setActionHandler('seekforward', (_evt: any) => {
           this.updatedMusicData({
             change: true
           })
@@ -496,6 +496,29 @@ class Common {
     this.musicPlayList = next
   }
 
+  // Keep queue playable: remove empty ids and entries that no longer exist in library.
+  // If queue becomes empty but library has songs, fall back to full library queue.
+  ensureQueueIntegrity = () => {
+    const idMap = new Map(this.localMusicList.map(item => [item.id, item]))
+    const next: InterfaceMusicInfo[] = []
+    this.musicPlayList.forEach(item => {
+      if (!item?.id) return
+      const updated = idMap.get(item.id)
+      if (updated?.id) next.push(updated)
+    })
+
+    if (next.length !== this.musicPlayList.length) {
+      this.musicPlayList = next
+    }
+
+    if (this.musicPlayList.length === 0) {
+      const fallback = this.localMusicList.filter(item => Boolean(item.id))
+      if (fallback.length) {
+        this.musicPlayList = cloneDeep(fallback)
+      }
+    }
+  }
+
   setQueueFromScope = (ids: string[], startId?: string) => {
     const idSet = new Set(ids.filter(Boolean))
     const next: InterfaceMusicInfo[] = []
@@ -561,6 +584,11 @@ class Common {
     if (this.musicPlayer) {
       this.musicPlayer.stop()
     }
+    this.ensureQueueIntegrity()
+    if (this.musicPlayList.length === 0) {
+      this.resetPlayback()
+      return
+    }
     // 如果是单曲循环
     if (this.playingType === EnumPlayingType.single && !isControl) {
       this.musicPlayer?.play()
@@ -569,25 +597,39 @@ class Common {
     // 随机播放
     if (this.playingType === EnumPlayingType.random && this.musicPlayList.length > 2) {
       const randomIndex = Math.floor(Math.random() * this.musicPlayList.length)
-      this.selectMusic(this.musicPlayList[randomIndex].id || '')
+      const target = this.musicPlayList[randomIndex]
+      if (target?.id) {
+        this.selectMusic(target.id)
+        return
+      }
+      this.ensureQueueIntegrity()
+      const fallback = this.musicPlayList[0]
+      if (fallback?.id) {
+        this.selectMusic(fallback.id)
+      } else {
+        this.resetPlayback()
+      }
       return
     }
-    let cur = 0
-    const len = this.musicPlayList.length - 1
-    while (cur < this.musicPlayList.length) {
-      if (this.musicPlayList[cur].id === this.musicData.id) {
-        break
+    const curIndex = this.musicPlayList.findIndex(item => item.id === this.musicData.id)
+    const safeCurIndex = curIndex >= 0 ? curIndex : -1
+    const nextIndex = (safeCurIndex + 1) % this.musicPlayList.length
+    const target = this.musicPlayList[nextIndex]
+    if (!target?.id) {
+      this.ensureQueueIntegrity()
+      const fallback = this.musicPlayList[0]
+      if (fallback?.id) {
+        this.selectMusic(fallback.id)
+      } else {
+        this.resetPlayback()
       }
-      cur++
+      return
     }
-    // 防止超出下一首
-    let next = cur + 1
-    next = next > len ? (next - len) - 1 : next
-    if (this.musicPlayList[next].id === this.musicData.id) {
+    if (target.id === this.musicData.id) {
       this.musicPlayer?.play()
-    } else {
-      this.selectMusic(this.musicPlayList[next].id || '')
+      return
     }
+    this.selectMusic(target.id)
   }
 
   // 歌曲播放上一首
@@ -595,6 +637,11 @@ class Common {
     if (this.musicPlayer) {
       this.musicPlayer.stop()
     }
+    this.ensureQueueIntegrity()
+    if (this.musicPlayList.length === 0) {
+      this.resetPlayback()
+      return
+    }
     // 如果是单曲循环
     if (this.playingType === EnumPlayingType.single && !isControl) {
       this.musicPlayer?.play()
@@ -603,25 +650,39 @@ class Common {
     // 随机播放
     if (this.playingType === EnumPlayingType.random && this.musicPlayList.length > 2) {
       const randomIndex = Math.floor(Math.random() * this.musicPlayList.length)
-      this.selectMusic(this.musicPlayList[randomIndex].id || '')
+      const target = this.musicPlayList[randomIndex]
+      if (target?.id) {
+        this.selectMusic(target.id)
+        return
+      }
+      this.ensureQueueIntegrity()
+      const fallback = this.musicPlayList[0]
+      if (fallback?.id) {
+        this.selectMusic(fallback.id)
+      } else {
+        this.resetPlayback()
+      }
       return
     }
-    let cur = 0
-    const len = this.musicPlayList.length - 1
-    while (cur < this.musicPlayList.length) {
-      if (this.musicPlayList[cur].id === this.musicData.id) {
-        break
+    const curIndex = this.musicPlayList.findIndex(item => item.id === this.musicData.id)
+    const safeCurIndex = curIndex >= 0 ? curIndex : 0
+    const prevIndex = (safeCurIndex - 1 + this.musicPlayList.length) % this.musicPlayList.length
+    const target = this.musicPlayList[prevIndex]
+    if (!target?.id) {
+      this.ensureQueueIntegrity()
+      const fallback = this.musicPlayList[0]
+      if (fallback?.id) {
+        this.selectMusic(fallback.id)
+      } else {
+        this.resetPlayback()
       }
-      cur++
+      return
     }
-    // 防止低于 0
-    let pre = cur - 1
-    pre = pre < 0 ? len : pre
-    if (this.musicPlayList[pre].id === this.musicData.id) {
+    if (target.id === this.musicData.id) {
       this.musicPlayer?.play()
-    } else {
-      this.selectMusic(this.musicPlayList[pre].id || '')
+      return
     }
+    this.selectMusic(target.id)
   }
 
   // 本地音乐展示列表

@@ -4,6 +4,30 @@
   --lyric-accent: #ff8aa1;
   --lyric-accent-soft: rgba(255, 138, 161, 0.18);
   --text-color: rgba(0, 0, 0, 0.65); // 主文本色
+
+  // Motion tokens (Apple Music-like: fast micro-interactions + springy page enter)
+  --motion-fast: 160ms;
+  --motion-medium: 260ms;
+  --motion-page: 420ms;
+  --ease-out: cubic-bezier(0.22, 0.85, 0.33, 1);
+  --ease-spring: cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 1ms;
+    --motion-medium: 1ms;
+    --motion-page: 1ms;
+  }
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary-color) 42%, white);
+  outline-offset: 2px;
 }
 
 .link {

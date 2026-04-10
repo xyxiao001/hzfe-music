@@ -1,0 +1,60 @@
+.page-import {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.import-card {
+  border-radius: 34px;
+  padding: 20px 20px 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 28px 70px rgba(28, 28, 45, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.86);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.card-desc {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(31, 31, 41, 0.58);
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.card-actions .ant-btn {
+  height: 40px;
+  border-radius: 16px;
+  font-weight: 800;
+}
+
+.card-actions .ant-btn-primary {
+  background: var(--primary-color);
+  box-shadow: 0 14px 28px color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.card-tip {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: rgba(31, 31, 41, 0.58);
+  line-height: 1.6;
+}
+
+@media screen and (max-width: 960px) {
+  .page-import {
+    grid-template-columns: 1fr;
+  }
+}
+
