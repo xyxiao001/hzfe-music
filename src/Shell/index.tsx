@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { Fragment, useMemo } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { observer } from 'mobx-react-lite'
 import {
@@ -88,7 +88,7 @@ const ShellLayout = observer(() => {
         </section>
         <nav className="rail-nav">
           {railItems.map((item) => (
-            <section key={item.key}>
+            <Fragment key={item.key}>
               {item.key === 'stats' ? <section className="rail-divider" /> : null}
               <button
                 type="button"
@@ -98,7 +98,7 @@ const ShellLayout = observer(() => {
                 <span className="rail-item-icon">{item.icon}</span>
                 <span className="rail-item-label">{item.label}</span>
               </button>
-            </section>
+            </Fragment>
           ))}
         </nav>
         <section className="rail-footer">
